@@ -9,7 +9,7 @@ namespace Api
     {
         public MapperProfile()
         {
-            CreateMap<Models.CreateUserModel, DAL.Entities.User>()
+            CreateMap<CreateUserModel, User>()
                 .ForMember(u => u.Id, m => m.MapFrom(s => new Guid()))
                 .ForMember(u => u.PasswordHash, m => m.MapFrom(s => HashHelper.GetHash(s.Password)))
                 .ForMember(u => u.BirthDate, m => m.MapFrom(s => s.BirthDate.UtcDateTime))
@@ -17,14 +17,17 @@ namespace Api
                 .ReverseMap();
             CreateMap<User, UserModel>();
 
-            CreateMap<DAL.Entities.Post, Models.PostModel>()
+            CreateMap<Post, PostModel>()
+                .ReverseMap();
+            CreateMap<CreatePostModel, Post>()
+                .ForMember(u => u.Id, m => m.MapFrom(s => new Guid()))
                 .ReverseMap();
 
-            CreateMap<DAL.Entities.Comment, Models.CommentModel>()
+            CreateMap<Comment, Models.CommentModel>()
                 .ReverseMap();
 
-            CreateMap<DAL.Entities.Avatar, Models.AttachModel>();
-            CreateMap<DAL.Entities.PostImage, Models.AttachModel>();
+            CreateMap<Avatar, AttachModel>();
+            CreateMap<PostImage, AttachModel>();
         }
     }
 }

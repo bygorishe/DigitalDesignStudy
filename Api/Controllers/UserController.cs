@@ -35,7 +35,8 @@ namespace Api.Controllers
         }
 
         [HttpDelete]
-        public async Task DeleteUser(Guid id) => await _userService.DeleteUser(id);
+        public async Task DeleteUser(Guid id) 
+            => await _userService.DeleteUser(id);
 
         [HttpPost]
         [Authorize]

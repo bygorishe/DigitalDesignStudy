@@ -170,7 +170,14 @@ namespace Api.Services
             var user = await GetUserById(userId);
             if (user != null)
             {
-                var avatar = new Avatar { Author = user, MimeType = meta.MimeType, FilePath = filePath, Name = meta.Name, Size = meta.Size };
+                var avatar = new Avatar 
+                { 
+                    Author = user, 
+                    MimeType = meta.MimeType, 
+                    FilePath = filePath,
+                    Name = meta.Name, 
+                    Size = meta.Size
+                };
                 user.Avatar = avatar;
                 await _context.SaveChangesAsync();
             }
