@@ -61,8 +61,8 @@ namespace Api.Services
                 Id = post.Id,
                 Images = post.PostImages.Select(x =>
                 new AttachWithLinkModel(_mapper.Map<AttachModel>(x), _linkContentGenerator)).ToList(),
-                Comments = post.Comments?.Select(x =>
-                new CommentModel(x)).ToList()
+                //Comments = post.Comments?.Select(x =>
+                //new CommentModel(x)).ToList()
             };
             return res;
         }
@@ -80,10 +80,10 @@ namespace Api.Services
                     Author = new UserAvatarModel(_mapper.Map<UserModel>(post.Author), post.Author.Avatar == null ? null : _linkAvatarGenerator),
                     Description = post.Description,
                     Id = post.Id,
-                    Images = post.PostImages?.Select(x =>
+                    Images = post.PostImages.Select(x =>
                     new AttachWithLinkModel(_mapper.Map<AttachModel>(x), _linkContentGenerator)).ToList(),
-                    Comments = post.Comments?.Select(x =>
-                    new CommentModel(x)).ToList()
+                    //Comments = post.Comments?.Select(x =>
+                    //new CommentModel(x)).ToList()
                 }).ToList();
             return res;
         }
@@ -100,7 +100,11 @@ namespace Api.Services
             var res = new List<CommentModel>();
             var post = await GetPostById(postContentId);
             foreach (var c in post.Comments)
-                res.Add(new CommentModel(c));
+            {
+                var commentModel = new CommentModel(c);
+                commentModel.User = _mapper.Map<UserModel>(c.Author);
+                res.Add(commentModel);
+            }
             return res;
         }
 

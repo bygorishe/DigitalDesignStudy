@@ -72,9 +72,6 @@ namespace Api.Controllers
         public async Task<List<PostModel>> GetPosts(int skip = 0, int take = 10)
             => await _postService.GetPosts(skip, take);
 
-        //[HttpPost]
-        //public async Task AddImagesToPost(List<MetadataModel> model, Guid id)
-        //    => await _postService.AddImagesToPost(id, model);
 
         [HttpPost]
         [Authorize]
@@ -106,10 +103,9 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<List<CommentModel>> GetPostComment(Guid postContentId)
-        {
-            return await _postService.GetPostComments(postContentId);
-        }
+        public async Task<List<CommentModel>> GetPostComments(Guid postContentId)
+            => await _postService.GetPostComments(postContentId);
+
 
         [HttpDelete]
         [Authorize]
