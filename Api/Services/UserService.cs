@@ -1,5 +1,7 @@
 ﻿using Api.Configs;
-using Api.Models;
+using Api.Models.Attach;
+using Api.Models.Token;
+using Api.Models.User;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Common;
@@ -18,6 +20,11 @@ namespace Api.Services
         private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly AuthConfig _config;
+        private Func<UserModel, string?>? _linkGenerator;
+        public void SetLinkGenerator(Func<UserModel, string?> linkGenerator)
+        {
+            _linkGenerator = linkGenerator;
+        }
 
         public UserService(IMapper mapper, DataContext context, IOptions<AuthConfig> config)
         {
@@ -31,7 +38,7 @@ namespace Api.Services
             var dbUser = _mapper.Map<User>(model);
             if (_context.Users.Any(x => x.Name == dbUser.Name && x.Id != dbUser.Id))
                 throw new Exception($"User with loginName :{dbUser.Name} exist");
-            await _context.Users.AddAsync(dbUser);
+            var t = await _context.Users.AddAsync(dbUser);
             await _context.SaveChangesAsync();
         }
 
@@ -187,6 +194,8 @@ namespace Api.Services
         {
             var user = await GetUserById(userId);
             var atach = _mapper.Map<AttachModel>(user.Avatar);
+            if (atach == null)
+                throw new Exception("User dont have avatar");
             return atach;
         }
 

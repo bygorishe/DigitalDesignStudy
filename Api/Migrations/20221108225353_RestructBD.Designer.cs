@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221106124518_UpdateCommentAndPost")]
-    partial class UpdateCommentAndPost
+    [Migration("20221108225353_RestructBD")]
+    partial class RestructBD
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,11 +26,9 @@ namespace Api.Migrations
 
             modelBuilder.Entity("DAL.Entities.Attach", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
@@ -70,7 +68,7 @@ namespace Api.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("PostId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("UserId")
@@ -116,9 +114,6 @@ namespace Api.Migrations
                     b.Property<string>("About")
                         .HasColumnType("text");
 
-                    b.Property<long?>("AvatarId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTimeOffset>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -141,9 +136,6 @@ namespace Api.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AvatarId")
-                        .IsUnique();
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -183,6 +175,12 @@ namespace Api.Migrations
                 {
                     b.HasBaseType("DAL.Entities.Attach");
 
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
+
                     b.ToTable("Avatars", (string)null);
                 });
 
@@ -190,15 +188,10 @@ namespace Api.Migrations
                 {
                     b.HasBaseType("DAL.Entities.Attach");
 
-                    b.Property<Guid?>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
                     b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("PostImages", (string)null);
                 });
@@ -216,9 +209,11 @@ namespace Api.Migrations
 
             modelBuilder.Entity("DAL.Entities.Comment", b =>
                 {
-                    b.HasOne("DAL.Entities.Post", null)
+                    b.HasOne("DAL.Entities.Post", "Post")
                         .WithMany("Comments")
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DAL.Entities.User", "Author")
                         .WithMany()
@@ -227,6 +222,8 @@ namespace Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("DAL.Entities.Post", b =>
@@ -238,15 +235,6 @@ namespace Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
-                });
-
-            modelBuilder.Entity("DAL.Entities.User", b =>
-                {
-                    b.HasOne("DAL.Entities.Avatar", "Avatar")
-                        .WithOne("User")
-                        .HasForeignKey("DAL.Entities.User", "AvatarId");
-
-                    b.Navigation("Avatar");
                 });
 
             modelBuilder.Entity("DAL.Entities.UserSession", b =>
@@ -267,6 +255,14 @@ namespace Api.Migrations
                         .HasForeignKey("DAL.Entities.Avatar", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DAL.Entities.User", "Owner")
+                        .WithOne("Avatar")
+                        .HasForeignKey("DAL.Entities.Avatar", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("DAL.Entities.PostImage", b =>
@@ -277,17 +273,13 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.Post", null)
+                    b.HasOne("DAL.Entities.Post", "Post")
                         .WithMany("PostImages")
-                        .HasForeignKey("PostId");
-
-                    b.HasOne("DAL.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("DAL.Entities.Post", b =>
@@ -299,13 +291,9 @@ namespace Api.Migrations
 
             modelBuilder.Entity("DAL.Entities.User", b =>
                 {
-                    b.Navigation("Sessions");
-                });
+                    b.Navigation("Avatar");
 
-            modelBuilder.Entity("DAL.Entities.Avatar", b =>
-                {
-                    b.Navigation("User")
-                        .IsRequired();
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Api.Models
+namespace Api.Models.User
 {
 
     public class CreateUserModel
@@ -10,17 +10,17 @@ namespace Api.Models
         public string? FullName { get; set; }
         public string? About { get; set; }
         [Required]
-        [EmailAddress]
+        //[EmailAddress]
         public string Email { get; set; }
         [Required]
-        [RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
+        //[RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
         public string Password { get; set; }
         [Required]
         [Compare(nameof(Password))]
         public string RetryPassword { get; set; }
         [Required]
         public DateTimeOffset BirthDate { get; set; }
-        public DateTimeOffset RegistrateDate { get; set; } = DateTimeOffset.Now.UtcDateTime;
+        public DateTimeOffset RegistrateDate { get; set; }
 
         public CreateUserModel(string name, string email, string password, string retryPassword, DateTimeOffset birthDate)
         {

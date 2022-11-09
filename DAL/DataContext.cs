@@ -21,6 +21,12 @@ namespace DAL
                 .HasIndex(f => f.Name)
                 .IsUnique();
 
+            //modelBuilder
+            //    .Entity<User>()
+            //    .HasOne(b => b.Avatar)
+            //.WithOne(i => i.Owner)
+            //.HasForeignKey<Avatar>(b => b.OwnerId);
+
             modelBuilder.Entity<Avatar>().ToTable(nameof(Avatars));
             modelBuilder.Entity<PostImage>().ToTable(nameof(PostImages));
         }

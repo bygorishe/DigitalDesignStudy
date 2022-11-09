@@ -1,4 +1,5 @@
-﻿using Api.Models;
+﻿using Api.Models.Attach;
+using Api.Models.User;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +15,19 @@ namespace Api.Controllers
         public UserController(UserService userService)
         {
             _userService = userService;
+            if (userService != null)
+                _userService.SetLinkGenerator(x =>
+            Url.Action(nameof(GetUserAvatar), new { userId = x.Id, download = false }));
         }
 
         [HttpPost]
-        public async Task CreateUser(CreateUserModel model) => await _userService.CreateUser(model);
+        public async Task CreateUser(CreateUserModel model)
+            => await _userService.CreateUser(model);
 
         [HttpGet]
         [Authorize]
-        public async Task<List<UserModel>> GetUsers() => await _userService.GetUsers();
+        public async Task<List<UserModel>> GetUsers() 
+            => await _userService.GetUsers();
 
         [HttpGet]
         [Authorize]
@@ -63,22 +69,14 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<FileResult> GetUserAvatar(Guid userId)
+        public async Task<FileResult> GetUserAvatar(Guid userId, bool download = false)
         {
             var attach = await _userService.GetUserAvatar(userId);
-            return File(System.IO.File.ReadAllBytes(attach.FilePath), attach.MimeType);
-        }
-
-        [HttpGet]
-        public async Task<FileResult> DownloadAvatar(Guid userId)
-        {
-            var attach = await _userService.GetUserAvatar(userId);
-            HttpContext.Response.ContentType = attach.MimeType;
-            FileContentResult result = new FileContentResult(System.IO.File.ReadAllBytes(attach.FilePath), attach.MimeType)
-            {
-                FileDownloadName = attach.Name
-            };
-            return result;
+            var fs = new FileStream(attach.FilePath, FileMode.Open);
+            if (download)
+                return File(fs, attach.MimeType, attach.Name);
+            else
+                return File(fs, attach.MimeType);
         }
     }
 }

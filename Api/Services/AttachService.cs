@@ -1,5 +1,5 @@
 ﻿using Api.Configs;
-using Api.Models;
+using Api.Models.Attach;
 using AutoMapper;
 using DAL;
 using Microsoft.Extensions.Options;
