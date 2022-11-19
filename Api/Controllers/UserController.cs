@@ -1,6 +1,8 @@
-﻿using Api.Models.Attach;
+﻿using Api.Consts;
+using Api.Models.Attach;
 using Api.Models.User;
 using Api.Services;
+using Common.Extentions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,64 +10,85 @@ namespace Api.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "Api")]
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
 
-        public UserController(UserService userService)
+        public UserController(UserService userService, LinkGeneratorService links)
         {
             _userService = userService;
-            if (userService != null)
-                _userService.SetLinkGenerator(x =>
-            Url.Action(nameof(GetUserAvatar), new { userId = x.Id, download = false }));
+            links.LinkAvatarGenerator = x =>
+            Url.ControllerAction<AttachController>(nameof(AttachController.GetUserAvatar), new
+            {
+                userId = x.Id,
+            });
         }
 
-        [HttpPost]
-        public async Task CreateUser(CreateUserModel model)
-            => await _userService.CreateUser(model);
-
         [HttpGet]
-        [Authorize]
-        public async Task<List<UserModel>> GetUsers() 
+        //[Authorize]
+        public async Task<IEnumerable<UserAvatarModel>> GetUsers()
             => await _userService.GetUsers();
 
         [HttpGet]
         [Authorize]
-        public async Task<UserModel> GetCurrentUser()
+        public async Task<UserAvatarModel> GetCurrentUser()
         {
-            var userIdString = User.Claims.FirstOrDefault(u => u.Type == "id")?.Value;
-            if (Guid.TryParse(userIdString, out var userId))
-                return await _userService.GetUser(userId);
-            else
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
                 throw new Exception("You are not authorized");
+            return await _userService.GetUser(userId);
         }
 
         [HttpDelete]
-        public async Task DeleteUser(Guid id) 
-            => await _userService.DeleteUser(id);
+        [Authorize]
+        public async Task DeleteUser()
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
+                throw new Exception("You are not authorized");
+            await _userService.DeleteUser(userId);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task UpdateUserInfo(UpdateUserModel model)
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
+                throw new Exception("You are not authorized");
+            await _userService.UpdateUserInformation(userId, model);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task ChangePassword(string oldPass, string newPass, string retryNewPass)
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
+                throw new Exception("You are not authorized");
+            await _userService.ChangePassword(userId, oldPass, newPass, retryNewPass);
+        }
 
         [HttpPost]
         [Authorize]
         public async Task AddAvatarToUser(MetadataModel model)
         {
-            var userIdString = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
-            if (Guid.TryParse(userIdString, out var userId))
-            {
-                var tempFi = new FileInfo(Path.Combine(Path.GetTempPath(), model.TempId.ToString()));
-                if (!tempFi.Exists)
-                    throw new Exception("file not found");
-                else
-                {
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "attaches", model.TempId.ToString());
-                    var destFi = new FileInfo(path);
-                    if (destFi.Directory != null && !destFi.Directory.Exists)
-                        destFi.Directory.Create();
-                    System.IO.File.Copy(tempFi.FullName, path, true);
-                    await _userService.AddAvatarToUser(userId, model, path);
-                }
-            }
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
+                throw new Exception("You are not authorized");
+            var tempFi = new FileInfo(Path.Combine(Path.GetTempPath(), model.TempId.ToString()));
+            if (!tempFi.Exists)
+                throw new Exception("File not found");
             else
-                throw new Exception("you are not authorized");
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "attaches", model.TempId.ToString());
+                var destFi = new FileInfo(path);
+                if (destFi.Directory != null && !destFi.Directory.Exists)
+                    destFi.Directory.Create();
+                System.IO.File.Copy(tempFi.FullName, path, true);
+                await _userService.AddAvatarToUser(userId, model, path);
+            }
         }
 
         [HttpGet]

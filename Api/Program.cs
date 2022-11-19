@@ -1,5 +1,6 @@
-﻿using Api;
-using Api.Configs;
+﻿using Api.Configs;
+using Api.Mapper;
+using Api.Middlewares;
 using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ var authConfig = authSection.Get<AuthConfig>();
 builder.Services.Configure<AuthConfig>(authSection);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(o =>
 {
     o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -26,33 +28,41 @@ builder.Services.AddSwaggerGen(o =>
     });
 
     o.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
             {
+                Reference = new OpenApiReference
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-
-                        },
-                        Scheme = "oauth2",
-                        Name = JwtBearerDefaults.AuthenticationScheme,
-                        In = ParameterLocation.Header,
-                    },
-                    new List<string>()
-                }
-            });
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                },
+                Scheme = "oauth2",
+                Name = JwtBearerDefaults.AuthenticationScheme,
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+    o.SwaggerDoc("Auth", new OpenApiInfo { Title = "Auth" });
+    o.SwaggerDoc("Api", new OpenApiInfo { Title = "Api" });
 });
 
 builder.Services.AddDbContext<DAL.DataContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSql"), sql => { });
 });
+
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
+
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<AttachService>();
+builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<LinkGeneratorService>();
+builder.Services.AddScoped<SubscribtionService>();
+
 builder.Services.AddAuthentication(o =>
 {
     o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -94,12 +104,17 @@ using (var serviceScope = ((IApplicationBuilder)app).ApplicationServices.GetServ
 //if (app.Environment.IsDevelopment() || app.Environment.IsProduction()) //prod потом убрать
 //{
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(o =>
+    {
+        o.SwaggerEndpoint("Api/swagger.json", "Api");
+        o.SwaggerEndpoint("Auth/swagger.json", "Auth");
+    });
 //}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseTokenValidator();
+app.UseGlobalErrorWrapper();
 app.MapControllers();
 app.Run();

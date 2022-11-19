@@ -7,11 +7,12 @@ namespace Api.Models.Post
         public Guid UserId { get; set; }
         public string? Description { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
-        public List<MetaWithPath> Contents { get; set; } = new List<MetaWithPath>();
+        public List<MetaLinkModel> Contents { get; set; } = new List<MetaLinkModel>();
     }
 
     public class CreatePostRequest
     {
+        public Guid? UserId { get; set; }
         public string? Description { get; set; }
         public List<MetadataModel> Contents { get; set; } = new List<MetadataModel>();
     }

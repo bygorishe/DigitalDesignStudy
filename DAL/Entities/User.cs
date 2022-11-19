@@ -13,6 +13,8 @@
 
         public virtual Avatar? Avatar { get; set; }
         public virtual ICollection<UserSession>? Sessions { get; set; }
-        //public virtual ICollection<Post>? Posts { get; set; }
+        public virtual ICollection<Post>? Posts { get; set; }
+        public virtual ICollection<Subscribtion>? Subscribtions { get; set; }
+        public virtual ICollection<Subscribtion>? Followers { get; set; }
     }
 }

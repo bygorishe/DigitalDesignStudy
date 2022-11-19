@@ -9,18 +9,18 @@
         public string Email { get; set; } = null!;
         public DateTimeOffset BirthDate { get; set; }
         public DateTimeOffset RegistrateDate { get; set; }
+        public int PostsCount { get; set; }
+        public int FollowersCount { get; set; }
+        public int SubscribtionsCount { get; set; }
     }
 
     public class UserAvatarModel : UserModel
     {
         public string? AvatarLink { get; set; }
-        public UserAvatarModel(UserModel model, Func<UserModel, string?>? linkGenerator)
-        {
-            Id = model.Id;
-            Name = model.Name;
-            Email = model.Email;
-            BirthDate = model.BirthDate;
-            AvatarLink = linkGenerator?.Invoke(model);
-        }
     }
+
+    //public class SubUserModel : UserModel
+    //{
+    //    public bool IsSubscribe { get; set; }
+    //}
 }

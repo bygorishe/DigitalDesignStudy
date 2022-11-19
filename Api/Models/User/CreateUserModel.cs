@@ -6,29 +6,20 @@ namespace Api.Models.User
     public class CreateUserModel
     {
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
         public string? FullName { get; set; }
         public string? About { get; set; }
         [Required]
         //[EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
         [Required]
         //[RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
-        public string Password { get; set; }
+        public string Password { get; set; } = null!;
         [Required]
         [Compare(nameof(Password))]
-        public string RetryPassword { get; set; }
+        public string RetryPassword { get; set; } = null!;
         [Required]
         public DateTimeOffset BirthDate { get; set; }
         public DateTimeOffset RegistrateDate { get; set; }
-
-        public CreateUserModel(string name, string email, string password, string retryPassword, DateTimeOffset birthDate)
-        {
-            Name = name;
-            Email = email;
-            Password = password;
-            RetryPassword = retryPassword;
-            BirthDate = birthDate;
-        }
     }
 }

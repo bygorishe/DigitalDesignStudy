@@ -20,7 +20,11 @@ namespace DAL
                 .Entity<User>()
                 .HasIndex(f => f.Name)
                 .IsUnique();
-
+            modelBuilder
+                .Entity<User>()
+                .HasMany(x => x.Followers)
+                .WithOne(x => x.Follower)
+                .HasForeignKey(x => x.FollowerId);
             //modelBuilder
             //    .Entity<User>()
             //    .HasOne(b => b.Avatar)
@@ -41,5 +45,8 @@ namespace DAL
         public DbSet<Attach> Attaches => Set<Attach>();
         public DbSet<Avatar> Avatars => Set<Avatar>();
         public DbSet<PostImage> PostImages => Set<PostImage>();
+        public DbSet<Like> Likes => Set<Like>();
+        public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
+        public DbSet<Subscribtion> Subscribtions => Set<Subscribtion>();
     }
 }

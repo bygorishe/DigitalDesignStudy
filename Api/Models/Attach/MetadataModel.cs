@@ -8,11 +8,11 @@
         public long Size { get; set; }
     }
 
-    public class MetaWithPath : MetadataModel
+    public class MetaLinkModel : MetadataModel
     {
         public string FilePath { get; set; } = null!;
         public Guid AuthorId { get; set; }
-        public MetaWithPath(MetadataModel model, Func<MetadataModel, string> pathgen, Guid authorId)
+        public MetaLinkModel(MetadataModel model, Func<MetadataModel, string> pathgen, Guid authorId)
         {
             TempId = model.TempId;
             Name = model.Name;
