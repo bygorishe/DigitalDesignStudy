@@ -1,6 +1,6 @@
 ﻿using Api.Configs;
+using Api.Exceptions;
 using Api.Models.Token;
-using AutoMapper;
 using Common;
 using DAL;
 using DAL.Entities;
@@ -14,13 +14,11 @@ namespace Api.Services
 {
     public class AuthService
     {
-        private readonly IMapper _mapper;
         private readonly DataContext _context;
         private readonly AuthConfig _config;
 
-        public AuthService(IMapper mapper, IOptions<AuthConfig> config, DataContext context)
+        public AuthService(IOptions<AuthConfig> config, DataContext context)
         {
-            _mapper = mapper;
             _context = context;
             _config = config.Value;
         }
@@ -29,9 +27,9 @@ namespace Api.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == login.ToLower());
             if (user == null)
-                throw new Exception("user not found");
+                throw new UserNotFoundException();
             if (!HashHelper.Verify(pass, user.PasswordHash))
-                throw new Exception("password is incorrect");
+                throw new WrongPasswordException();
             return user;
         }
 
@@ -93,7 +91,7 @@ namespace Api.Services
         {
             var session = await _context.UserSessions.Include(x => x.User).FirstOrDefaultAsync(x => x.RefreshToken == id);
             if (session == null)
-                throw new Exception("Session is not found");
+                throw new SessionNotFoundException();
             return session;
         }
 

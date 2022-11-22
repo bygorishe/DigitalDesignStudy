@@ -1,7 +1,11 @@
 ﻿using Api.Configs;
 using Api.Mapper;
+using Api.Mapper.MapperActions;
 using Api.Middlewares;
+using Api.Models.Post;
 using Api.Services;
+using AutoMapper;
+using DAL.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -58,10 +62,10 @@ builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PostService>();
-builder.Services.AddScoped<AttachService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<LinkGeneratorService>();
 builder.Services.AddScoped<SubscribtionService>();
+//builder.Services.AddTransient<IMappingAction<Post, PostModel>, PostModelMapperAction>();
 
 builder.Services.AddAuthentication(o =>
 {

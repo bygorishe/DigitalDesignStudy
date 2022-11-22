@@ -33,6 +33,8 @@ namespace DAL
 
             modelBuilder.Entity<Avatar>().ToTable(nameof(Avatars));
             modelBuilder.Entity<PostImage>().ToTable(nameof(PostImages));
+            modelBuilder.Entity<Like>().ToTable(nameof(Likes));
+            modelBuilder.Entity<Comment>().ToTable(nameof(Comments));
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

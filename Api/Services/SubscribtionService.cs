@@ -1,4 +1,5 @@
-﻿using Api.Models.Subscribtion;
+﻿using Api.Exceptions;
+using Api.Models.Subscribtion;
 using Api.Models.User;
 using AutoMapper;
 using DAL;
@@ -22,7 +23,7 @@ namespace Api.Services
         {
             var dbSub = _mapper.Map<Subscribtion>(model);
             if (_context.Subscribtions.Any(x => x.UserId == dbSub.UserId && x.FollowerId == dbSub.FollowerId))
-                throw new Exception($"You are already follow this account");
+                throw new SubscribtionAlreadyExistException();
             var t = await _context.Subscribtions.AddAsync(dbSub);
             await _context.SaveChangesAsync();
         }
@@ -32,7 +33,7 @@ namespace Api.Services
             var dbSub = _context.Subscribtions
                 .FirstOrDefault(x => x.UserId == model.UserId && x.FollowerId == model.FollowerId);
             if(dbSub == null)
-                throw new Exception($"You are already unsubscribe from this account");
+                throw new SubscridtionNotFoundException();
             _context.Subscribtions.Remove(dbSub);
             await _context.SaveChangesAsync();
         }

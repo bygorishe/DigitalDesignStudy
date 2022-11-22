@@ -1,9 +1,4 @@
-﻿using Api.Consts;
-using Api.Services;
-using Common.Extentions;
-using DAL.Entities;
-
-namespace Api.Middlewares
+﻿namespace Api.Middlewares
 {
     public class ErrorMiddleware
     {

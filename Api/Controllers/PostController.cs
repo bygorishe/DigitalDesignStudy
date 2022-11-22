@@ -1,14 +1,12 @@
 ﻿using Api.Consts;
-using Api.Models.Attach;
+using Api.Exceptions;
 using Api.Models.Comment;
+using Api.Models.Like;
 using Api.Models.Post;
 using Api.Services;
 using Common.Extentions;
-using DAL.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
 
 namespace Api.Controllers
 {
@@ -22,14 +20,14 @@ namespace Api.Controllers
         public PostController(PostService postService, LinkGeneratorService links)
         {
             _postService = postService;
-            //links.LinkContentGenerator = x => Url.ControllerAction<AttachController>(nameof(AttachController.GetPostContent), new
-            //{
-            //    postContentId = x.Id,
-            //});
-            //links.LinkAvatarGenerator = x => Url.ControllerAction<AttachController>(nameof(AttachController.GetUserAvatar), new
-            //{
-            //    userId = x.Id,
-            //});
+            links.LinkContentGenerator = x => Url.ControllerAction<AttachController>(nameof(AttachController.GetPostImages), new
+            {
+                postContentId = x.Id,
+            });
+            links.LinkAvatarGenerator = x => Url.ControllerAction<AttachController>(nameof(AttachController.GetUserAvatar), new
+            {
+                userId = x.Id,
+            });
         }
 
         [HttpPost]
@@ -40,17 +38,29 @@ namespace Api.Controllers
             {
                 var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
                 if (userId == default)
-                    throw new Exception("not authorize");
+                    throw new NotAuthorizedException();
                 request.UserId = userId;
             }
-
             await _postService.CreatePost(request);
         }
 
         [HttpGet]
-        public async Task<List<PostModel>> GetPosts(int skip = 0, int take = 10)
-            => await _postService.GetPosts(skip, take);
+        public async Task<PostModel> GetPost(Guid id) //намерено без авторизации
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            //if (userId == default)
+            //    throw new NotAuthorizedException();
+            return await _postService.GetPost(id, userId);
+        }
 
+        [HttpGet]
+        public async Task<List<PostModel>> GetPosts(int skip = 0, int take = 10)
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            //if (userId == default)
+            //    throw new NotAuthorizedException();
+            return await _postService.GetPosts(skip, take, userId);
+        }
 
         [HttpPost]
         [Authorize]
@@ -58,7 +68,7 @@ namespace Api.Controllers
         {
             var userIdString = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
             if (!Guid.TryParse(userIdString, out var userId))
-                throw new Exception("You are not authorized");
+                throw new NotAuthorizedException();
 
             var model = new CreateCommentModel
             {
@@ -70,7 +80,61 @@ namespace Api.Controllers
             await _postService.AddComment(model);
         }
 
+        [HttpDelete]
+        [Authorize]
+        public async Task DeleteComment(Guid id)
+            => await _postService.DeleteComment(id);
+
+        [HttpPost]
+        [Authorize]
+        public async Task LikePost(CreateLikeModel model)
+        {
+            if (!model.UserId.HasValue)
+            {
+                var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+                if (userId == default)
+                    throw new NotAuthorizedException();
+                model.UserId = userId;
+            }
+            await _postService.LikePost(model);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public async Task DeleteLike(Guid id)
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
+                throw new NotAuthorizedException();
+            await _postService.UnlikePost(id, userId);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task LikeComment(CreateLikeModel model)
+        {
+            if (!model.UserId.HasValue)
+            {
+                var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+                if (userId == default)
+                    throw new NotAuthorizedException();
+                model.UserId = userId;
+            }
+            await _postService.LikeComment(model);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public async Task DeleteCommentLike(Guid id)
+        {
+            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+            if (userId == default)
+                throw new NotAuthorizedException();
+            await _postService.UnlikeComment(id, userId);
+        }
+
         [HttpGet]
+        [Authorize]
         public async Task<FileStreamResult> GetPostContent(Guid postContentId, bool download = false) //не робит
         {
             var attach = await _postService.GetPostImage(postContentId);
@@ -82,17 +146,23 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        //public async Task<List<CommentModel>> GetPostComments(Guid postContentId)
-        //    => await _postService.GetPostComments(postContentId);
+        [Authorize]
+        public async Task<IEnumerable<CommentModel>> GetPostComments(Guid postId)
+            => await _postService.GetPostComments(postId);
 
+        [HttpGet]
+        [Authorize]
+        public async Task<IEnumerable<LikeModel>> GetPostLikes(Guid postId)
+            => await _postService.GetPostLikes(postId);
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IEnumerable<LikeModel>> GetCommentLikes(Guid postId)
+            => await _postService.GetCommentLikes(postId);
 
         [HttpDelete]
         [Authorize]
         public async Task DeletePost(Guid id)
             => await _postService.DeletePost(id);
-
-        [HttpGet]
-        public async Task<PostModel> GetPost(Guid id)
-            => await _postService.GetPost(id);
     }
 }

@@ -1,9 +1,8 @@
-﻿using Api.Models.Token;
+﻿using Api.Exceptions;
+using Api.Models.Token;
 using Api.Models.User;
 using Api.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace Api.Controllers
 {
@@ -34,7 +33,7 @@ namespace Api.Controllers
         public async Task RegisterUser(CreateUserModel model)
         {
             if (await _userService.CheckUserExist(model.Email))
-                throw new Exception("user is exist");
+                throw new UserNotFoundException();
             await _userService.CreateUser(model);
         }
     }

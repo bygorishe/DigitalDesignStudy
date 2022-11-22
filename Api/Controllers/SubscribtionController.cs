@@ -1,4 +1,5 @@
 ﻿using Api.Consts;
+using Api.Exceptions;
 using Api.Models.Subscribtion;
 using Api.Models.User;
 using Api.Services;
@@ -14,10 +15,12 @@ namespace Api.Controllers
     public class SubscribtionController : ControllerBase
     {
         private readonly SubscribtionService _subscribtionService;
+        private readonly UserService _userService;
 
-        public SubscribtionController(SubscribtionService subscribtionService, LinkGeneratorService links)
+        public SubscribtionController(SubscribtionService subscribtionService, UserService userService, LinkGeneratorService links)
         {
             _subscribtionService = subscribtionService;
+            _userService = userService;
             links.LinkAvatarGenerator = x =>
             Url.ControllerAction<AttachController>(nameof(AttachController.GetUserAvatar), new
             {
@@ -33,9 +36,11 @@ namespace Api.Controllers
             {
                 var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
                 if (userId == default)
-                    throw new Exception("You are not authorized");
+                    throw new NotAuthorizedException();
                 model.UserId = userId;
             }
+            if (await _userService.CheckUserExist(model.FollowerId))
+                throw new UserNotFoundException();
             await _subscribtionService.SubscribeToUser(model);
         }
 
@@ -47,9 +52,11 @@ namespace Api.Controllers
             {
                 var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
                 if (userId == default)
-                    throw new Exception("You are not authorized");
+                    throw new NotAuthorizedException();
                 model.UserId = userId;
             }
+            if (await _userService.CheckUserExist(model.FollowerId))
+                throw new UserNotFoundException();
             await _subscribtionService.UnsubscribeFromUser(model);
         }
 

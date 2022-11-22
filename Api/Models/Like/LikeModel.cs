@@ -4,8 +4,7 @@ namespace Api.Models.Like
 {
     public class LikeModel
     {
-        public Guid Id { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
-        public virtual UserModel User { get; set; } = null!;
+        public virtual UserAvatarModel User { get; set; } = null!;
     }
 }

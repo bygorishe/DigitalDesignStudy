@@ -1,12 +1,14 @@
 ﻿using Api.Mapper.MapperActions;
 using Api.Models.Attach;
 using Api.Models.Comment;
+using Api.Models.Like;
 using Api.Models.Post;
 using Api.Models.Subscribtion;
 using Api.Models.User;
 using AutoMapper;
 using Common;
 using DAL.Entities;
+using System.Security.Claims;
 
 namespace Api.Mapper
 {
@@ -34,14 +36,28 @@ namespace Api.Mapper
                 .ForMember(d => d.Contens, m => m.MapFrom(d => d.PostImages))
                 .ForMember(d => d.LikesCount, m => m.MapFrom(d => d.Likes!.Count))
                 .ForMember(d => d.CommentsCount, m => m.MapFrom(d => d.Comments!.Count));
+                //.AfterMap<PostModelMapperAction>();
 
-            CreateMap<Comment, CommentModel>();
+            CreateMap<Comment, CommentModel>()
+                .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
             CreateMap<CreateCommentModel, Comment>()
                 .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
 
             CreateMap<SubscribtionModel, Subscribtion>()
                 .ForMember(d => d.SubscribeTime, m => m.MapFrom(s => DateTimeOffset.UtcNow))
                 .ReverseMap();
+
+            CreateMap<CreateLikeModel, Like>()
+                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow))
+                .ForMember(d => d.PostId, m => m.MapFrom(s => s.ObjectId));
+            CreateMap<Like, LikeModel>()
+                .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
+
+            CreateMap<CreateLikeModel, CommentLike>()
+                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow))
+                .ForMember(d => d.CommentId, m => m.MapFrom(s => s.ObjectId));
+            CreateMap<CommentLike, LikeModel>()
+                .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
 
             CreateMap<Avatar, AttachModel>();
             CreateMap<PostImage, AttachModel>();

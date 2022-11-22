@@ -1,4 +1,5 @@
 ﻿using Api.Consts;
+using Api.Exceptions;
 using Api.Models.Attach;
 using Api.Models.User;
 using Api.Services;
@@ -15,14 +16,9 @@ namespace Api.Controllers
     {
         private readonly UserService _userService;
 
-        public UserController(UserService userService, LinkGeneratorService links)
+        public UserController(UserService userService)
         {
             _userService = userService;
-            links.LinkAvatarGenerator = x =>
-            Url.ControllerAction<AttachController>(nameof(AttachController.GetUserAvatar), new
-            {
-                userId = x.Id,
-            });
         }
 
         [HttpGet]
@@ -36,7 +32,7 @@ namespace Api.Controllers
         {
             var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
             if (userId == default)
-                throw new Exception("You are not authorized");
+                throw new NotAuthorizedException();
             return await _userService.GetUser(userId);
         }
 
@@ -46,7 +42,7 @@ namespace Api.Controllers
         {
             var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
             if (userId == default)
-                throw new Exception("You are not authorized");
+                throw new NotAuthorizedException();
             await _userService.DeleteUser(userId);
         }
 
@@ -56,7 +52,7 @@ namespace Api.Controllers
         {
             var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
             if (userId == default)
-                throw new Exception("You are not authorized");
+                throw new NotAuthorizedException();
             await _userService.UpdateUserInformation(userId, model);
         }
 
@@ -66,7 +62,7 @@ namespace Api.Controllers
         {
             var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
             if (userId == default)
-                throw new Exception("You are not authorized");
+                throw new NotAuthorizedException();
             await _userService.ChangePassword(userId, oldPass, newPass, retryNewPass);
         }
 
@@ -76,10 +72,10 @@ namespace Api.Controllers
         {
             var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
             if (userId == default)
-                throw new Exception("You are not authorized");
+                throw new NotAuthorizedException();
             var tempFi = new FileInfo(Path.Combine(Path.GetTempPath(), model.TempId.ToString()));
             if (!tempFi.Exists)
-                throw new Exception("File not found");
+                throw new Exceptions.FileNotFoundException();
             else
             {
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "attaches", model.TempId.ToString());

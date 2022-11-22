@@ -25,29 +25,23 @@ namespace Api.Controllers
         {
             var res = new List<MetadataModel>();
             foreach (var file in files)
-            {
                 res.Add(await UploadFile(file));
-            }
             return res;
         }
-
 
         [HttpGet]
         [Route("{postContentId}")]
         public async Task<FileStreamResult> GetPostImages(Guid postContentId, bool download = false)
             => RenderAttach(await _postService.GetPostImage(postContentId), download);
 
-
         [HttpGet]
         [Route("{userId}")]
         public async Task<FileStreamResult> GetUserAvatar(Guid userId, bool download = false)
             => RenderAttach(await _userService.GetUserAvatar(userId), download);
 
-
         [HttpGet]
         public async Task<FileStreamResult> GetCurentUserAvatar(bool download = false)
             => await GetUserAvatar(User.GetClaimValue<Guid>(ClaimNames.Id), download);
-
 
         private async Task<MetadataModel> UploadFile(IFormFile file)
         {
@@ -59,21 +53,15 @@ namespace Api.Controllers
                 MimeType = file.ContentType,
                 Size = file.Length,
             };
-
             var newPath = Path.Combine(tempPath, meta.TempId.ToString());
-
             var fileinfo = new FileInfo(newPath);
+            //fileinfo.Refresh();
             if (fileinfo.Exists)
-            {
                 throw new Exception("file exist");
-            }
             else
             {
                 using (var stream = System.IO.File.Create(newPath))
-                {
                     await file.CopyToAsync(stream);
-                }
-
                 return meta;
             }
         }

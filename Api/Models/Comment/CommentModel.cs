@@ -11,13 +11,8 @@ namespace Api.Models.Comment
         public Guid Id { get; set; }
         public string Caption { get; set; } = null!;
         public DateTimeOffset CreatedDate { get; set; }
-        public virtual UserModel User { get; set; } = null!;
-
-        public CommentModel(DAL.Entities.Comment comment)
-        {
-            Id = comment.Id;
-            Caption = comment.Caption;
-            CreatedDate = comment.CreatedDate;
-        }
+        public virtual UserAvatarModel User { get; set; } = null!;
+        //public bool IsLiked { get; set; }
+        //public int LikeCount { get; set; }
     }
 }
