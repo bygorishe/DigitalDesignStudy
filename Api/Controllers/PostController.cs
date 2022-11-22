@@ -20,7 +20,7 @@ namespace Api.Controllers
         public PostController(PostService postService, LinkGeneratorService links)
         {
             _postService = postService;
-            links.LinkContentGenerator = x => Url.ControllerAction<AttachController>(nameof(AttachController.GetPostImages), new
+            links.LinkContentGenerator = x => Url.ControllerAction<AttachController>(nameof(AttachController.GetPostImage), new
             {
                 postContentId = x.Id,
             });
@@ -64,19 +64,15 @@ namespace Api.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task AddCommentToPost(CreateCommentRequest request, Guid postId)
+        public async Task AddCommentToPost(CreateCommentModel model)
         {
-            var userIdString = User.Claims.FirstOrDefault(x => x.Type == "id")?.Value;
-            if (!Guid.TryParse(userIdString, out var userId))
-                throw new NotAuthorizedException();
-
-            var model = new CreateCommentModel
+            if (!model.UserId.HasValue)
             {
-                UserId = userId,
-                PostId = postId,
-                Caption = request.Caption
-            };
-
+                var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+                if (userId == default)
+                    throw new NotAuthorizedException();
+                model.UserId = userId;
+            }
             await _postService.AddComment(model);
         }
 
@@ -133,17 +129,17 @@ namespace Api.Controllers
             await _postService.UnlikeComment(id, userId);
         }
 
-        [HttpGet]
-        [Authorize]
-        public async Task<FileStreamResult> GetPostContent(Guid postContentId, bool download = false) //не робит
-        {
-            var attach = await _postService.GetPostImage(postContentId);
-            var fs = new FileStream(attach.FilePath, FileMode.Open);
-            if (download)
-                return File(fs, attach.MimeType, attach.Name);
-            else
-                return File(fs, attach.MimeType);
-        }
+        //[HttpGet]
+        //[Authorize]
+        //public async Task<FileStreamResult> GetPostContent(Guid postContentId, bool download = false) //не робит
+        //{
+        //    var attach = await _postService.GetPostImage(postContentId);
+        //    var fs = new FileStream(attach.FilePath, FileMode.Open);
+        //    if (download)
+        //        return File(fs, attach.MimeType, attach.Name);
+        //    else
+        //        return File(fs, attach.MimeType);
+        //}
 
         [HttpGet]
         [Authorize]

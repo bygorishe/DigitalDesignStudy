@@ -16,9 +16,14 @@ namespace Api.Controllers
     {
         private readonly UserService _userService;
 
-        public UserController(UserService userService)
+        public UserController(UserService userService, LinkGeneratorService links)
         {
             _userService = userService;
+            links.LinkAvatarGenerator = x =>
+            Url.ControllerAction<AttachController>(nameof(AttachController.GetUserAvatar), new
+            {
+                userId = x.Id,
+            });
         }
 
         [HttpGet]
@@ -87,15 +92,15 @@ namespace Api.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<FileResult> GetUserAvatar(Guid userId, bool download = false)
-        {
-            var attach = await _userService.GetUserAvatar(userId);
-            var fs = new FileStream(attach.FilePath, FileMode.Open);
-            if (download)
-                return File(fs, attach.MimeType, attach.Name);
-            else
-                return File(fs, attach.MimeType);
-        }
+        //[HttpGet]
+        //public async Task<FileResult> GetUserAvatar(Guid userId, bool download = false)
+        //{
+        //    var attach = await _userService.GetUserAvatar(userId);
+        //    var fs = new FileStream(attach.FilePath, FileMode.Open);
+        //    if (download)
+        //        return File(fs, attach.MimeType, attach.Name);
+        //    else
+        //        return File(fs, attach.MimeType);
+        //}
     }
 }

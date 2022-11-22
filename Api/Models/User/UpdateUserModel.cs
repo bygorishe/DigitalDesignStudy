@@ -1,6 +1,5 @@
 ﻿namespace Api.Models.User
 {
-
     public class UpdateUserModel
     {
         public string? Name { get; set; }

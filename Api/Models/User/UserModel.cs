@@ -18,9 +18,4 @@
     {
         public string? AvatarLink { get; set; }
     }
-
-    //public class SubUserModel : UserModel
-    //{
-    //    public bool IsSubscribe { get; set; }
-    //}
 }

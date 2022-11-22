@@ -2,7 +2,6 @@
 
 namespace Api.Models.User
 {
-
     public class CreateUserModel
     {
         [Required]
@@ -10,10 +9,10 @@ namespace Api.Models.User
         public string? FullName { get; set; }
         public string? About { get; set; }
         [Required]
-        //[EmailAddress]
+        [EmailAddress]
         public string Email { get; set; } = null!;
         [Required]
-        //[RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
+        [RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
         public string Password { get; set; } = null!;
         [Required]
         [Compare(nameof(Password))]

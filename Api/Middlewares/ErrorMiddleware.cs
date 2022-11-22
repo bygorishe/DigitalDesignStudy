@@ -27,8 +27,6 @@
     {
         public static IApplicationBuilder UseGlobalErrorWrapper(
             this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<ErrorMiddleware>();
-        }
+            => builder.UseMiddleware<ErrorMiddleware>();
     }
 }

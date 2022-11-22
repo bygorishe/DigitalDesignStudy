@@ -31,7 +31,7 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("{postContentId}")]
-        public async Task<FileStreamResult> GetPostImages(Guid postContentId, bool download = false)
+        public async Task<FileStreamResult> GetPostImage(Guid postContentId, bool download = false)
             => RenderAttach(await _postService.GetPostImage(postContentId), download);
 
         [HttpGet]

@@ -1,8 +1,4 @@
-﻿using Api.Models.Attach;
-using Api.Models.Post;
-using Api.Models.User;
-using System;
-using System.Xml.Linq;
+﻿using Api.Models.User;
 
 namespace Api.Models.Comment
 {

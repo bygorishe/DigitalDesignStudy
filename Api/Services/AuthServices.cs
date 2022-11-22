@@ -83,7 +83,7 @@ namespace Api.Services
         {
             var session = await _context.UserSessions.FirstOrDefaultAsync(x => x.Id == id);
             if (session == null)
-                throw new Exception("Session is not found");
+                throw new SessionNotFoundException();
             return session;
         }
 

@@ -8,7 +8,6 @@ using Api.Models.User;
 using AutoMapper;
 using Common;
 using DAL.Entities;
-using System.Security.Claims;
 
 namespace Api.Mapper
 {
@@ -28,7 +27,8 @@ namespace Api.Mapper
                 .ForMember(d => d.FollowersCount, m => m.MapFrom(s => s.Followers!.Count))
                 .AfterMap<UserAvatarMapperAction>();
 
-            CreateMap<CreatePostRequest, CreatePostModel>();
+            CreateMap<CreatePostRequest, CreatePostModel>()
+                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
             CreateMap<CreatePostModel, Post>()
                 .ForMember(d => d.PostImages, m => m.MapFrom(s => s.Contents))
                 .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
@@ -62,7 +62,7 @@ namespace Api.Mapper
             CreateMap<Avatar, AttachModel>();
             CreateMap<PostImage, AttachModel>();
             CreateMap<PostImage, AttachExternalModel>().AfterMap<PostContentMapperAction>();
-            CreateMap<MetadataModel, PostImage>();
+            CreateMap<MetadataModel, MetaLinkModel>();
             CreateMap<MetaLinkModel, PostImage>();
         }
     }

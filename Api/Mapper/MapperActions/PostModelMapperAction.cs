@@ -10,9 +10,9 @@
 //    public class PostModelMapperAction : IMappingAction<Post, PostModel>
 //    {
 //        ClaimsPrincipal _claims;
-//        public PostModelMapperAction(ClaimsPrincipal claims)
+//        public PostModelMapperAction()
 //        {
-//            _claims = claims;
+
 //        }
 //        public void Process(Post source, PostModel destination, ResolutionContext context)
 //            => destination.IsLiked = source.Likes.Any(x => x.UserId == _claims.GetClaimValue<Guid>(ClaimNames.Id));

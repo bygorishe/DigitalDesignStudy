@@ -1,11 +1,8 @@
 ﻿using Api.Configs;
 using Api.Mapper;
-using Api.Mapper.MapperActions;
 using Api.Middlewares;
-using Api.Models.Post;
 using Api.Services;
-using AutoMapper;
-using DAL.Entities;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -18,7 +15,6 @@ var authConfig = authSection.Get<AuthConfig>();
 builder.Services.Configure<AuthConfig>(authSection);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
 builder.Services.AddSwaggerGen(o =>
 {
     o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -51,11 +47,17 @@ builder.Services.AddSwaggerGen(o =>
     o.SwaggerDoc("Auth", new OpenApiInfo { Title = "Auth" });
     o.SwaggerDoc("Api", new OpenApiInfo { Title = "Api" });
 });
-
 builder.Services.AddDbContext<DAL.DataContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSql"), sql => { });
 });
+
+builder.Services.AddOptions();
+builder.Services.AddMemoryCache();
+builder.Services.Configure<ClientRateLimitOptions>(builder.Configuration.GetSection("ClientRateLimiting"));
+builder.Services.Configure<ClientRateLimitPolicies>(builder.Configuration.GetSection("ClientRateLimitPolicies"));
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 
@@ -65,7 +67,6 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<LinkGeneratorService>();
 builder.Services.AddScoped<SubscribtionService>();
-//builder.Services.AddTransient<IMappingAction<Post, PostModel>, PostModelMapperAction>();
 
 builder.Services.AddAuthentication(o =>
 {
@@ -121,4 +122,5 @@ app.UseAuthorization();
 app.UseTokenValidator();
 app.UseGlobalErrorWrapper();
 app.MapControllers();
+
 app.Run();

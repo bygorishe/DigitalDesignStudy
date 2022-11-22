@@ -42,7 +42,7 @@ namespace Api.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateUserInformation(Guid id, UpdateUserModel model) //новая модель или только свойства? createuser ???
+        public async Task UpdateUserInformation(Guid id, UpdateUserModel model)
         {
             var dbUser = await GetUserById(id);
             if (model.Name != null)
@@ -56,7 +56,7 @@ namespace Api.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task ChangePassword(Guid id, string oldPass, string newPass, string retrynewPass) //новая модель или только свойства? createuser ???
+        public async Task ChangePassword(Guid id, string oldPass, string newPass, string retrynewPass)
         {
             var dbuser = await GetUserById(id);
             if (!HashHelper.Verify(oldPass, dbuser.PasswordHash))
@@ -72,6 +72,8 @@ namespace Api.Services
             => await _context.Users.AsNoTracking()
             .Include(x => x.Avatar)
             .Include(x => x.Posts)
+            .Include(x => x.Subscribtions)
+            .Include(x => x.Followers)
             .Select(x => _mapper.Map<UserAvatarModel>(x))
             .ToListAsync();
 
@@ -79,9 +81,9 @@ namespace Api.Services
         {
             var user = await _context.Users
                 .Include(x => x.Avatar)
-                .Include(x => x.Posts)
-                .Include(x => x.Followers)
-                .Include(x => x.Subscribtions)
+                //.Include(x => x.Posts) //не имеет смысла
+                //.Include(x => x.Followers)
+                //.Include(x => x.Subscribtions)
                 .FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
                 throw new UserNotFoundException();

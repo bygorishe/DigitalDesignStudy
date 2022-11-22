@@ -25,16 +25,11 @@ namespace DAL
                 .HasMany(x => x.Followers)
                 .WithOne(x => x.Follower)
                 .HasForeignKey(x => x.FollowerId);
-            //modelBuilder
-            //    .Entity<User>()
-            //    .HasOne(b => b.Avatar)
-            //.WithOne(i => i.Owner)
-            //.HasForeignKey<Avatar>(b => b.OwnerId);
 
             modelBuilder.Entity<Avatar>().ToTable(nameof(Avatars));
             modelBuilder.Entity<PostImage>().ToTable(nameof(PostImages));
-            modelBuilder.Entity<Like>().ToTable(nameof(Likes));
-            modelBuilder.Entity<Comment>().ToTable(nameof(Comments));
+            //modelBuilder.Entity<Like>().ToTable(nameof(Likes));
+            //modelBuilder.Entity<Comment>().ToTable(nameof(Comments));
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -155,10 +155,8 @@ namespace Api.Services
                 .ToListAsync();
 
         public async Task<AttachModel> GetPostImage(Guid postContentId)
-        {
-            var res = await _context.PostImages.FirstOrDefaultAsync(x => x.Id == postContentId);
-            return _mapper.Map<AttachModel>(res);
-        }
+            => _mapper.Map<AttachModel>(
+                await _context.PostImages.FirstOrDefaultAsync(x => x.Id == postContentId));
 
         public async Task DeletePost(Guid postId)
         {

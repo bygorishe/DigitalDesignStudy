@@ -29,7 +29,7 @@ namespace Api.Controllers
             => await _authService.GetTokenByRefreshToken(model.RefreshToken);
 
         [HttpPost]
-        [ApiExplorerSettings(GroupName = "Api")]
+        //[ApiExplorerSettings(GroupName = "Api")]
         public async Task RegisterUser(CreateUserModel model)
         {
             if (await _userService.CheckUserExist(model.Email))
