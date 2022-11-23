@@ -1,6 +1,7 @@
 ﻿using Api.Models.Attach;
 using Api.Models.User;
-using DAL.Entities;
+using DAL.Entities.AttachAssociations;
+using DAL.Entities.UserAssociations;
 
 namespace Api.Services
 {

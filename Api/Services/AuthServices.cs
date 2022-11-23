@@ -3,7 +3,7 @@ using Api.Exceptions;
 using Api.Models.Token;
 using Common;
 using DAL;
-using DAL.Entities;
+using DAL.Entities.UserAssociations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

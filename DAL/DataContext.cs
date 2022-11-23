@@ -1,4 +1,7 @@
-﻿using DAL.Entities;
+﻿using DAL.Entities.AttachAssociations;
+using DAL.Entities.ChatAssociations;
+using DAL.Entities.PostAssociations;
+using DAL.Entities.UserAssociations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL
@@ -45,5 +48,7 @@ namespace DAL
         public DbSet<Like> Likes => Set<Like>();
         public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
         public DbSet<Subscribtion> Subscribtions => Set<Subscribtion>();
+        public DbSet<Message> Messages => Set<Message>();
+        public DbSet<Chat> Chats => Set<Chat>();
     }
 }

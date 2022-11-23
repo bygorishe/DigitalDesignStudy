@@ -3,7 +3,7 @@ using Api.Models.Subscribtion;
 using Api.Models.User;
 using AutoMapper;
 using DAL;
-using DAL.Entities;
+using DAL.Entities.UserAssociations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services

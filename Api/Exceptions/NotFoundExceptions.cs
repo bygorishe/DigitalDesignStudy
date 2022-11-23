@@ -61,4 +61,20 @@
             Model = "Session";
         }
     }
+
+    public class ChatNotFoundException : NotFoundException
+    {
+        public ChatNotFoundException()
+        {
+            Model = "Chat";
+        }
+    }
+
+    public class MessageNotFoundException : NotFoundException
+    {
+        public MessageNotFoundException()
+        {
+            Model = "Message";
+        }
+    }
 }

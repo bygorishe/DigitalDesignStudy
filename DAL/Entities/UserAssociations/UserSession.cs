@@ -1,4 +1,4 @@
-﻿namespace DAL.Entities
+﻿namespace DAL.Entities.UserAssociations
 {
     public class UserSession
     {
@@ -8,6 +8,6 @@
         public DateTimeOffset Created { get; set; }
         public bool IsActive { get; set; } = true;
 
-        public virtual User User { get; set; } = null!; 
+        public virtual User User { get; set; } = null!;
     }
 }

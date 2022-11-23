@@ -1,7 +1,7 @@
 ﻿using Api.Models.Attach;
 using Api.Services;
 using AutoMapper;
-using DAL.Entities;
+using DAL.Entities.AttachAssociations;
 
 namespace Api.Mapper.MapperActions
 {

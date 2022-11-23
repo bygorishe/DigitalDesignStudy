@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DAL.Entities;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Api.Models.Comment;
@@ -7,6 +6,7 @@ using Api.Models.Post;
 using Api.Models.Attach;
 using Api.Models.Like;
 using Api.Exceptions;
+using DAL.Entities.PostAssociations;
 
 namespace Api.Services
 {

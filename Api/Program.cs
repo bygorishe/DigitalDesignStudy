@@ -67,6 +67,7 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<LinkGeneratorService>();
 builder.Services.AddScoped<SubscribtionService>();
+builder.Services.AddScoped<ChatServices>();
 
 builder.Services.AddAuthentication(o =>
 {

@@ -1,13 +1,18 @@
 ﻿using Api.Mapper.MapperActions;
 using Api.Models.Attach;
+using Api.Models.Chat;
 using Api.Models.Comment;
 using Api.Models.Like;
+using Api.Models.Message;
 using Api.Models.Post;
 using Api.Models.Subscribtion;
 using Api.Models.User;
 using AutoMapper;
 using Common;
-using DAL.Entities;
+using DAL.Entities.AttachAssociations;
+using DAL.Entities.ChatAssociations;
+using DAL.Entities.PostAssociations;
+using DAL.Entities.UserAssociations;
 
 namespace Api.Mapper
 {
@@ -58,6 +63,15 @@ namespace Api.Mapper
                 .ForMember(d => d.CommentId, m => m.MapFrom(s => s.ObjectId));
             CreateMap<CommentLike, LikeModel>()
                 .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
+
+            CreateMap<CreateChatModel, Chat>();
+            //.AfterMap<ChatMapperAction>();
+            CreateMap<Chat, ChatModel>()
+                .ForMember(d => d.MessagesCount, m => m.MapFrom(s => s.Messages!.Count))
+                .ForMember(d => d.MembersCount, m => m.MapFrom(s => s.Users!.Count));
+
+            CreateMap<CreateMessageModel, Message>();
+            CreateMap<Message, MessageModel>();
 
             CreateMap<Avatar, AttachModel>();
             CreateMap<PostImage, AttachModel>();

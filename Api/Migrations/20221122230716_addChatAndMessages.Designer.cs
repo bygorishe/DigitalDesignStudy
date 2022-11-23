@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20221122230716_addChatAndMessages")]
+    partial class addChatAndMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,21 +23,6 @@ namespace Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("ChatUser", b =>
-                {
-                    b.Property<Guid>("ChatsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UsersId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("ChatsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("ChatUser");
-                });
 
             modelBuilder.Entity("DAL.Entities.AttachAssociations.Attach", b =>
                 {
@@ -247,6 +234,9 @@ namespace Api.Migrations
                     b.Property<DateTimeOffset>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("ChatId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -266,6 +256,8 @@ namespace Api.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
 
                     b.HasIndex("Email")
                         .IsUnique();
@@ -324,21 +316,6 @@ namespace Api.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("PostImages", (string)null);
-                });
-
-            modelBuilder.Entity("ChatUser", b =>
-                {
-                    b.HasOne("DAL.Entities.ChatAssociations.Chat", null)
-                        .WithMany()
-                        .HasForeignKey("ChatsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DAL.Entities.UserAssociations.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("DAL.Entities.AttachAssociations.Attach", b =>
@@ -456,6 +433,13 @@ namespace Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("DAL.Entities.UserAssociations.User", b =>
+                {
+                    b.HasOne("DAL.Entities.ChatAssociations.Chat", null)
+                        .WithMany("Users")
+                        .HasForeignKey("ChatId");
+                });
+
             modelBuilder.Entity("DAL.Entities.UserAssociations.UserSession", b =>
                 {
                     b.HasOne("DAL.Entities.UserAssociations.User", "User")
@@ -504,6 +488,8 @@ namespace Api.Migrations
             modelBuilder.Entity("DAL.Entities.ChatAssociations.Chat", b =>
                 {
                     b.Navigation("Messages");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("DAL.Entities.PostAssociations.Post", b =>

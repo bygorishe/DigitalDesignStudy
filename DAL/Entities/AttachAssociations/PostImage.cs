@@ -1,4 +1,6 @@
-﻿namespace DAL.Entities
+﻿using DAL.Entities.PostAssociations;
+
+namespace DAL.Entities.AttachAssociations
 {
     public class PostImage : Attach
     {

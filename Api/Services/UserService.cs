@@ -4,7 +4,7 @@ using Api.Models.User;
 using AutoMapper;
 using Common;
 using DAL;
-using DAL.Entities;
+using DAL.Entities.UserAssociations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -98,7 +98,7 @@ namespace Api.Services
             var user = await GetUserById(userId);
             if (user != null)
             {
-                var avatar = new Avatar
+                var avatar = new DAL.Entities.AttachAssociations.Avatar
                 {
                     Author = user,
                     MimeType = meta.MimeType,

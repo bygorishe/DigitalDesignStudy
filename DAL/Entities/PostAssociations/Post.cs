@@ -1,4 +1,7 @@
-﻿namespace DAL.Entities
+﻿using DAL.Entities.AttachAssociations;
+using DAL.Entities.UserAssociations;
+
+namespace DAL.Entities.PostAssociations
 {
     public class Post
     {

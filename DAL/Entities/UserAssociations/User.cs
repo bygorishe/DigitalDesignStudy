@@ -1,4 +1,8 @@
-﻿namespace DAL.Entities
+﻿using DAL.Entities.AttachAssociations;
+using DAL.Entities.ChatAssociations;
+using DAL.Entities.PostAssociations;
+
+namespace DAL.Entities.UserAssociations
 {
     public class User
     {
@@ -16,5 +20,6 @@
         public virtual ICollection<Post>? Posts { get; set; }
         public virtual ICollection<Subscribtion>? Subscribtions { get; set; }
         public virtual ICollection<Subscribtion>? Followers { get; set; }
+        public virtual ICollection<Chat>? Chats { get; set; }
     }
 }
