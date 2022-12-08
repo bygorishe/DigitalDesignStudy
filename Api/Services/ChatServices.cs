@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using DAL;
 using Api.Models.Chat;
-using DAL.Entities.ChatAssociations;
+using DAL.Entities.Chats;
 using Api.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Api.Models.Message;

@@ -1,6 +1,6 @@
-﻿using DAL.Entities.UserAssociations;
+﻿using DAL.Entities.Users;
 
-namespace DAL.Entities.AttachAssociations
+namespace DAL.Entities.Attaches
 {
     public class Avatar : Attach
     {

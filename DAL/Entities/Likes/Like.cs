@@ -1,15 +1,15 @@
-﻿using DAL.Entities.UserAssociations;
+﻿using DAL.Entities.Users;
 
-namespace DAL.Entities.PostAssociations
+namespace DAL.Entities.Likes
 {
     public class Like
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }
-        public Guid PostId { get; set; }
         public DateTimeOffset CreatedDate { get; set; }
+        public bool IsCanceled { get; set; } = false;
+        public DateTimeOffset? CancelDate { get; set; }
 
-        public virtual Post Post { get; set; } = null!;
         public virtual User Author { get; set; } = null!;
     }
 }

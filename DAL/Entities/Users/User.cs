@@ -1,8 +1,8 @@
-﻿using DAL.Entities.AttachAssociations;
-using DAL.Entities.ChatAssociations;
-using DAL.Entities.PostAssociations;
+﻿using DAL.Entities.Attaches;
+using DAL.Entities.Chats;
+using DAL.Entities.Posts;
 
-namespace DAL.Entities.UserAssociations
+namespace DAL.Entities.Users
 {
     public class User
     {
@@ -14,6 +14,9 @@ namespace DAL.Entities.UserAssociations
         public string PasswordHash { get; set; } = "empty";
         public DateTimeOffset BirthDate { get; set; }
         public DateTimeOffset RegistrateDate { get; set; }
+        public bool IsVerified { get; set; } = false;
+        public bool IsDeleted { get; set; } = false;
+        public DateTimeOffset? DeleteDate { get; set; }
 
         public virtual Avatar? Avatar { get; set; }
         public virtual ICollection<UserSession>? Sessions { get; set; }

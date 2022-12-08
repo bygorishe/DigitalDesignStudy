@@ -1,7 +1,8 @@
-﻿using DAL.Entities.AttachAssociations;
-using DAL.Entities.ChatAssociations;
-using DAL.Entities.PostAssociations;
-using DAL.Entities.UserAssociations;
+﻿using DAL.Entities.Attaches;
+using DAL.Entities.Chats;
+using DAL.Entities.Likes;
+using DAL.Entities.Posts;
+using DAL.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL
@@ -31,8 +32,9 @@ namespace DAL
 
             modelBuilder.Entity<Avatar>().ToTable(nameof(Avatars));
             modelBuilder.Entity<PostImage>().ToTable(nameof(PostImages));
-            //modelBuilder.Entity<Like>().ToTable(nameof(Likes));
-            //modelBuilder.Entity<Comment>().ToTable(nameof(Comments));
+            modelBuilder.Entity<MessageLike>().ToTable(nameof(MessageLikes));
+            modelBuilder.Entity<CommentLike>().ToTable(nameof(CommentLikes));
+            modelBuilder.Entity<PostLike>().ToTable(nameof(PostLikes));
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -46,9 +48,12 @@ namespace DAL
         public DbSet<Avatar> Avatars => Set<Avatar>();
         public DbSet<PostImage> PostImages => Set<PostImage>();
         public DbSet<Like> Likes => Set<Like>();
+        public DbSet<MessageLike> MessageLikes => Set<MessageLike>();
+        public DbSet<PostLike> PostLikes => Set<PostLike>();
         public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
         public DbSet<Subscribtion> Subscribtions => Set<Subscribtion>();
         public DbSet<Message> Messages => Set<Message>();
         public DbSet<Chat> Chats => Set<Chat>();
+        public DbSet<Tag> Tags => Set<Tag>();
     }
 }

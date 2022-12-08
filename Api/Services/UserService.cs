@@ -2,9 +2,9 @@
 using Api.Models.Attach;
 using Api.Models.User;
 using AutoMapper;
-using Common;
+using Common.Services;
 using DAL;
-using DAL.Entities.UserAssociations;
+using DAL.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -24,7 +24,7 @@ namespace Api.Services
             => await _context.Users.AnyAsync(x => x.Email.ToLower() == email.ToLower());
 
         public async Task<bool> CheckUserExist(Guid id)
-            => await _context.Users.AnyAsync(x => x.Id == id);
+            => await _context.Users.AnyAsync(x => x.Id == id && !x.IsDeleted && x.IsVerified);
 
         public async Task CreateUser(CreateUserModel model)
         {
@@ -35,12 +35,43 @@ namespace Api.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteUser(Guid id)
+        public async Task<User> GetUserById(Guid id)
+        {
+            var user = await _context.Users
+                .Include(x => x.Avatar)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null /*|| !user.IsVerified*/) //нет смысла отдельный эксепшн делать
+                throw new UserNotFoundException();
+            if (user.IsDeleted)
+                throw new UserDeletedException();
+            return user;
+        }
+
+        private async Task HardDeleteUser(Guid id)
         {
             var dbUser = await GetUserById(id);
             _context.Users.Remove(dbUser);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteUser(Guid id)
+        {
+            var dbUser = await GetUserById(id);
+            dbUser.IsDeleted = true;
+            dbUser.DeleteDate = DateTimeOffset.UtcNow;
+            await _context.SaveChangesAsync();
+        }
+
+        //public async Task RestoreUser(User dbUser)
+        //{
+        //    //var dbUser = await _context.Users
+        //    //    .FirstOrDefaultAsync(x => x.Id == id);
+        //    //if(dbUser == null)
+        //    //    throw new UserNotFoundException();
+        //    dbUser.IsDeleted = false;
+        //    dbUser.DeleteDate = null;
+        //    await _context.SaveChangesAsync();
+        //}
 
         public async Task UpdateUserInformation(Guid id, UpdateUserModel model)
         {
@@ -59,36 +90,24 @@ namespace Api.Services
         public async Task ChangePassword(Guid id, string oldPass, string newPass, string retrynewPass)
         {
             var dbuser = await GetUserById(id);
-            if (!HashHelper.Verify(oldPass, dbuser.PasswordHash))
+            if (!HashServices.Verify(oldPass, dbuser.PasswordHash))
                 throw new WrongPasswordException();
             var comparer = StringComparer.OrdinalIgnoreCase;
             if (comparer.Compare(newPass, retrynewPass) != 0)
-                throw new Exception("Passwords are not equal");
-            dbuser.PasswordHash = HashHelper.GetHash(newPass);
+                throw new NotEqualsPasswordsException();
+            dbuser.PasswordHash = HashServices.GetHash(newPass);
             await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<UserAvatarModel>> GetUsers()
             => await _context.Users.AsNoTracking()
             .Include(x => x.Avatar)
-            .Include(x => x.Posts)
-            .Include(x => x.Subscribtions)
-            .Include(x => x.Followers)
+            //.Include(x => x.Posts)
+            //.Include(x => x.Subscribtions)
+            //.Include(x => x.Followers)
+            .Where(x => !x.IsDeleted/* && x.IsVerified*/)
             .Select(x => _mapper.Map<UserAvatarModel>(x))
             .ToListAsync();
-
-        public async Task<User> GetUserById(Guid id)
-        {
-            var user = await _context.Users
-                .Include(x => x.Avatar)
-                //.Include(x => x.Posts) //не имеет смысла
-                //.Include(x => x.Followers)
-                //.Include(x => x.Subscribtions)
-                .FirstOrDefaultAsync(x => x.Id == id);
-            if (user == null)
-                throw new UserNotFoundException();
-            return user;
-        }
 
         public async Task<UserAvatarModel> GetUser(Guid id)
             => _mapper.Map<User, UserAvatarModel>(await GetUserById(id));
@@ -98,7 +117,7 @@ namespace Api.Services
             var user = await GetUserById(userId);
             if (user != null)
             {
-                var avatar = new DAL.Entities.AttachAssociations.Avatar
+                var avatar = new DAL.Entities.Attaches.Avatar
                 {
                     Author = user,
                     MimeType = meta.MimeType,

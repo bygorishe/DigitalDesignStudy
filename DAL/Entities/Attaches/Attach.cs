@@ -1,6 +1,6 @@
-﻿using DAL.Entities.UserAssociations;
+﻿using DAL.Entities.Users;
 
-namespace DAL.Entities.AttachAssociations
+namespace DAL.Entities.Attaches
 {
     public class Attach
     {
@@ -9,6 +9,8 @@ namespace DAL.Entities.AttachAssociations
         public string MimeType { get; set; } = null!;
         public string FilePath { get; set; } = null!;
         public long Size { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTimeOffset? DeleteDate { get; set; }
 
         public Guid AuthorId { get; set; }
         public virtual User Author { get; set; } = null!;

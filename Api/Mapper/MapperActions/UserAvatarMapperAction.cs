@@ -1,7 +1,7 @@
 ﻿using Api.Models.User;
 using Api.Services;
 using AutoMapper;
-using DAL.Entities.UserAssociations;
+using DAL.Entities.Users;
 
 namespace Api.Mapper.MapperActions
 {

@@ -2,7 +2,9 @@
 using Api.Models.Token;
 using Api.Models.User;
 using Api.Services;
+using DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers
 {
@@ -13,11 +15,13 @@ namespace Api.Controllers
     {
         private readonly AuthService _authService;
         private readonly UserService _userService;
+        private readonly DataContext _context;
 
-        public AuthController(AuthService authService, UserService userService)
+        public AuthController(AuthService authService, UserService userService, DataContext context)
         {
             _authService = authService;
             _userService = userService;
+            _context = context;
         }
 
         [HttpPost]
@@ -33,8 +37,15 @@ namespace Api.Controllers
         public async Task RegisterUser(CreateUserModel model)
         {
             if (await _userService.CheckUserExist(model.Email))
-                throw new UserNotFoundException();
+                throw new UserAlreadyExistException("");
             await _userService.CreateUser(model);
+        }
+
+        [HttpPost]
+        public async Task VerifiedUser(Guid id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            await _authService.VerifiedEmail(user);
         }
     }
 }

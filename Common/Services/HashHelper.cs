@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace Common
+namespace Common.Services
 {
-    public static class HashHelper
+    public static class HashServices
     {
         public static string GetHash(string input)
         {

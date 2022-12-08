@@ -8,11 +8,12 @@ using Api.Models.Post;
 using Api.Models.Subscribtion;
 using Api.Models.User;
 using AutoMapper;
-using Common;
-using DAL.Entities.AttachAssociations;
-using DAL.Entities.ChatAssociations;
-using DAL.Entities.PostAssociations;
-using DAL.Entities.UserAssociations;
+using Common.Services;
+using DAL.Entities.Attaches;
+using DAL.Entities.Chats;
+using DAL.Entities.Likes;
+using DAL.Entities.Posts;
+using DAL.Entities.Users;
 
 namespace Api.Mapper
 {
@@ -22,7 +23,7 @@ namespace Api.Mapper
         {
             CreateMap<CreateUserModel, User>()
                 //.ForMember(u => u.Id, m => m.MapFrom(s => new Guid()))
-                .ForMember(d => d.PasswordHash, m => m.MapFrom(s => HashHelper.GetHash(s.Password)))
+                .ForMember(d => d.PasswordHash, m => m.MapFrom(s => HashServices.GetHash(s.Password)))
                 .ForMember(d => d.BirthDate, m => m.MapFrom(s => s.BirthDate.UtcDateTime))
                 .ForMember(d => d.RegistrateDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
             CreateMap<User, UserModel>();
@@ -44,7 +45,8 @@ namespace Api.Mapper
                 //.AfterMap<PostModelMapperAction>();
 
             CreateMap<Comment, CommentModel>()
-                .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
+                .ForMember(d => d.User, m => m.MapFrom(s => s.Author))
+                .ForMember(d => d.LikeCount, m => m.MapFrom(s => s.Likes.Count));
             CreateMap<CreateCommentModel, Comment>()
                 .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
 
@@ -53,14 +55,14 @@ namespace Api.Mapper
                 .ReverseMap();
 
             CreateMap<CreateLikeModel, Like>()
-                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow))
-                .ForMember(d => d.PostId, m => m.MapFrom(s => s.ObjectId));
+                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
+            //    .ForMember(d => d.PostId, m => m.MapFrom(s => s.ObjectId));
             CreateMap<Like, LikeModel>()
                 .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
 
             CreateMap<CreateLikeModel, CommentLike>()
-                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow))
-                .ForMember(d => d.CommentId, m => m.MapFrom(s => s.ObjectId));
+                .ForMember(d => d.CreatedDate, m => m.MapFrom(s => DateTimeOffset.UtcNow));
+             //   .ForMember(d => d.CommentId, m => m.MapFrom(s => s.ObjectId));
             CreateMap<CommentLike, LikeModel>()
                 .ForMember(d => d.User, m => m.MapFrom(s => s.Author));
 

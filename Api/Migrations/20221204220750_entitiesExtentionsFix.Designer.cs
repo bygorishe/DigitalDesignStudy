@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20221122234341_addChatAndMessages_fix")]
-    partial class addChatAndMessages_fix
+    [Migration("20221204220750_entitiesExtentionsFix")]
+    partial class entitiesExtentionsFix
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -39,7 +39,7 @@ namespace Api.Migrations
                     b.ToTable("ChatUser");
                 });
 
-            modelBuilder.Entity("DAL.Entities.AttachAssociations.Attach", b =>
+            modelBuilder.Entity("DAL.Entities.Attaches.Attach", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,9 +48,15 @@ namespace Api.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("FilePath")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("MimeType")
                         .IsRequired()
@@ -70,7 +76,7 @@ namespace Api.Migrations
                     b.ToTable("Attaches");
                 });
 
-            modelBuilder.Entity("DAL.Entities.ChatAssociations.Chat", b =>
+            modelBuilder.Entity("DAL.Entities.Chats.Chat", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -78,6 +84,12 @@ namespace Api.Migrations
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -87,7 +99,7 @@ namespace Api.Migrations
                     b.ToTable("Chats");
                 });
 
-            modelBuilder.Entity("DAL.Entities.ChatAssociations.Message", b =>
+            modelBuilder.Entity("DAL.Entities.Chats.Message", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -98,6 +110,18 @@ namespace Api.Migrations
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ImageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -110,12 +134,39 @@ namespace Api.Migrations
 
                     b.HasIndex("ChatId");
 
+                    b.HasIndex("ImageId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Comment", b =>
+            modelBuilder.Entity("DAL.Entities.Likes.Like", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CancelDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsCanceled")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Likes");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Posts.Comment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,35 +176,20 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("CommentId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("DAL.Entities.PostAssociations.CommentLike", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CommentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -162,36 +198,14 @@ namespace Api.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("CommentLikes");
-                });
-
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Like", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTimeOffset>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
                     b.HasIndex("PostId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Likes");
+                    b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Post", b =>
+            modelBuilder.Entity("DAL.Entities.Posts.Post", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -200,8 +214,14 @@ namespace Api.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Description")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -213,14 +233,40 @@ namespace Api.Migrations
                     b.ToTable("Posts");
                 });
 
-            modelBuilder.Entity("DAL.Entities.UserAssociations.Subscribtion", b =>
+            modelBuilder.Entity("DAL.Entities.Posts.Tag", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Users.Subscribtion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CancelTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<Guid>("FollowerId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCanceled")
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset>("SubscribeTime")
                         .HasColumnType("timestamp with time zone");
@@ -237,7 +283,7 @@ namespace Api.Migrations
                     b.ToTable("Subscribtions");
                 });
 
-            modelBuilder.Entity("DAL.Entities.UserAssociations.User", b =>
+            modelBuilder.Entity("DAL.Entities.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -249,12 +295,18 @@ namespace Api.Migrations
                     b.Property<DateTimeOffset>("BirthDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("DeleteDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FullName")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -278,7 +330,7 @@ namespace Api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("DAL.Entities.UserAssociations.UserSession", b =>
+            modelBuilder.Entity("DAL.Entities.Users.UserSession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -303,9 +355,24 @@ namespace Api.Migrations
                     b.ToTable("UserSessions");
                 });
 
-            modelBuilder.Entity("DAL.Entities.AttachAssociations.Avatar", b =>
+            modelBuilder.Entity("PostTag", b =>
                 {
-                    b.HasBaseType("DAL.Entities.AttachAssociations.Attach");
+                    b.Property<Guid>("PostsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TagsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PostsId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("PostTag");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Attaches.Avatar", b =>
+                {
+                    b.HasBaseType("DAL.Entities.Attaches.Attach");
 
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uuid");
@@ -316,9 +383,9 @@ namespace Api.Migrations
                     b.ToTable("Avatars", (string)null);
                 });
 
-            modelBuilder.Entity("DAL.Entities.AttachAssociations.PostImage", b =>
+            modelBuilder.Entity("DAL.Entities.Attaches.PostImage", b =>
                 {
-                    b.HasBaseType("DAL.Entities.AttachAssociations.Attach");
+                    b.HasBaseType("DAL.Entities.Attaches.Attach");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
@@ -328,24 +395,60 @@ namespace Api.Migrations
                     b.ToTable("PostImages", (string)null);
                 });
 
+            modelBuilder.Entity("DAL.Entities.Likes.CommentLike", b =>
+                {
+                    b.HasBaseType("DAL.Entities.Likes.Like");
+
+                    b.Property<Guid>("CommentId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("CommentId");
+
+                    b.ToTable("CommentLikes", (string)null);
+                });
+
+            modelBuilder.Entity("DAL.Entities.Likes.MessageLike", b =>
+                {
+                    b.HasBaseType("DAL.Entities.Likes.Like");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("MessageLikes", (string)null);
+                });
+
+            modelBuilder.Entity("DAL.Entities.Likes.PostLike", b =>
+                {
+                    b.HasBaseType("DAL.Entities.Likes.Like");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("PostLikes", (string)null);
+                });
+
             modelBuilder.Entity("ChatUser", b =>
                 {
-                    b.HasOne("DAL.Entities.ChatAssociations.Chat", null)
+                    b.HasOne("DAL.Entities.Chats.Chat", null)
                         .WithMany()
                         .HasForeignKey("ChatsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.UserAssociations.User", null)
+                    b.HasOne("DAL.Entities.Users.User", null)
                         .WithMany()
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DAL.Entities.AttachAssociations.Attach", b =>
+            modelBuilder.Entity("DAL.Entities.Attaches.Attach", b =>
                 {
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Author")
+                    b.HasOne("DAL.Entities.Users.User", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -354,32 +457,53 @@ namespace Api.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("DAL.Entities.ChatAssociations.Message", b =>
+            modelBuilder.Entity("DAL.Entities.Chats.Message", b =>
                 {
-                    b.HasOne("DAL.Entities.ChatAssociations.Chat", null)
+                    b.HasOne("DAL.Entities.Chats.Chat", null)
                         .WithMany("Messages")
                         .HasForeignKey("ChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.UserAssociations.User", "User")
+                    b.HasOne("DAL.Entities.Attaches.Attach", "Image")
+                        .WithMany()
+                        .HasForeignKey("ImageId");
+
+                    b.HasOne("DAL.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Image");
+
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Comment", b =>
+            modelBuilder.Entity("DAL.Entities.Likes.Like", b =>
                 {
-                    b.HasOne("DAL.Entities.PostAssociations.Post", "Post")
+                    b.HasOne("DAL.Entities.Users.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Posts.Comment", b =>
+                {
+                    b.HasOne("DAL.Entities.Posts.Comment", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("CommentId");
+
+                    b.HasOne("DAL.Entities.Posts.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Author")
+                    b.HasOne("DAL.Entities.Users.User", "Author")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -390,47 +514,9 @@ namespace Api.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("DAL.Entities.PostAssociations.CommentLike", b =>
+            modelBuilder.Entity("DAL.Entities.Posts.Post", b =>
                 {
-                    b.HasOne("DAL.Entities.PostAssociations.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Comment");
-                });
-
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Like", b =>
-                {
-                    b.HasOne("DAL.Entities.PostAssociations.Post", "Post")
-                        .WithMany("Likes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Post", b =>
-                {
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Author")
+                    b.HasOne("DAL.Entities.Users.User", "Author")
                         .WithMany("Posts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -439,15 +525,26 @@ namespace Api.Migrations
                     b.Navigation("Author");
                 });
 
-            modelBuilder.Entity("DAL.Entities.UserAssociations.Subscribtion", b =>
+            modelBuilder.Entity("DAL.Entities.Posts.Tag", b =>
                 {
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Follower")
+                    b.HasOne("DAL.Entities.Users.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Users.Subscribtion", b =>
+                {
+                    b.HasOne("DAL.Entities.Users.User", "Follower")
                         .WithMany("Followers")
                         .HasForeignKey("FollowerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.UserAssociations.User", "User")
+                    b.HasOne("DAL.Entities.Users.User", "User")
                         .WithMany("Subscribtions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -458,9 +555,9 @@ namespace Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DAL.Entities.UserAssociations.UserSession", b =>
+            modelBuilder.Entity("DAL.Entities.Users.UserSession", b =>
                 {
-                    b.HasOne("DAL.Entities.UserAssociations.User", "User")
+                    b.HasOne("DAL.Entities.Users.User", "User")
                         .WithMany("Sessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -469,32 +566,47 @@ namespace Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("DAL.Entities.AttachAssociations.Avatar", b =>
+            modelBuilder.Entity("PostTag", b =>
                 {
-                    b.HasOne("DAL.Entities.AttachAssociations.Attach", null)
-                        .WithOne()
-                        .HasForeignKey("DAL.Entities.AttachAssociations.Avatar", "Id")
+                    b.HasOne("DAL.Entities.Posts.Post", null)
+                        .WithMany()
+                        .HasForeignKey("PostsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.UserAssociations.User", "Owner")
+                    b.HasOne("DAL.Entities.Posts.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DAL.Entities.Attaches.Avatar", b =>
+                {
+                    b.HasOne("DAL.Entities.Attaches.Attach", null)
+                        .WithOne()
+                        .HasForeignKey("DAL.Entities.Attaches.Avatar", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.Users.User", "Owner")
                         .WithOne("Avatar")
-                        .HasForeignKey("DAL.Entities.AttachAssociations.Avatar", "OwnerId")
+                        .HasForeignKey("DAL.Entities.Attaches.Avatar", "OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("DAL.Entities.AttachAssociations.PostImage", b =>
+            modelBuilder.Entity("DAL.Entities.Attaches.PostImage", b =>
                 {
-                    b.HasOne("DAL.Entities.AttachAssociations.Attach", null)
+                    b.HasOne("DAL.Entities.Attaches.Attach", null)
                         .WithOne()
-                        .HasForeignKey("DAL.Entities.AttachAssociations.PostImage", "Id")
+                        .HasForeignKey("DAL.Entities.Attaches.PostImage", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DAL.Entities.PostAssociations.Post", "Post")
+                    b.HasOne("DAL.Entities.Posts.Post", "Post")
                         .WithMany("PostImages")
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -503,12 +615,75 @@ namespace Api.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("DAL.Entities.ChatAssociations.Chat", b =>
+            modelBuilder.Entity("DAL.Entities.Likes.CommentLike", b =>
+                {
+                    b.HasOne("DAL.Entities.Posts.Comment", "Comment")
+                        .WithMany("Likes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.Likes.Like", null)
+                        .WithOne()
+                        .HasForeignKey("DAL.Entities.Likes.CommentLike", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Likes.MessageLike", b =>
+                {
+                    b.HasOne("DAL.Entities.Likes.Like", null)
+                        .WithOne()
+                        .HasForeignKey("DAL.Entities.Likes.MessageLike", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.Chats.Message", "Message")
+                        .WithMany("Likes")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Likes.PostLike", b =>
+                {
+                    b.HasOne("DAL.Entities.Likes.Like", null)
+                        .WithOne()
+                        .HasForeignKey("DAL.Entities.Likes.PostLike", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DAL.Entities.Posts.Post", "Post")
+                        .WithMany("Likes")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Chats.Chat", b =>
                 {
                     b.Navigation("Messages");
                 });
 
-            modelBuilder.Entity("DAL.Entities.PostAssociations.Post", b =>
+            modelBuilder.Entity("DAL.Entities.Chats.Message", b =>
+                {
+                    b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Posts.Comment", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+                });
+
+            modelBuilder.Entity("DAL.Entities.Posts.Post", b =>
                 {
                     b.Navigation("Comments");
 
@@ -517,7 +692,7 @@ namespace Api.Migrations
                     b.Navigation("PostImages");
                 });
 
-            modelBuilder.Entity("DAL.Entities.UserAssociations.User", b =>
+            modelBuilder.Entity("DAL.Entities.Users.User", b =>
                 {
                     b.Navigation("Avatar");
 

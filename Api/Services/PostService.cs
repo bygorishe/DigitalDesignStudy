@@ -6,7 +6,10 @@ using Api.Models.Post;
 using Api.Models.Attach;
 using Api.Models.Like;
 using Api.Exceptions;
-using DAL.Entities.PostAssociations;
+using DAL.Entities.Posts;
+using DAL.Entities.Likes;
+using DAL.Entities.Users;
+using Microsoft.Extensions.Hosting;
 
 namespace Api.Services
 {
@@ -20,7 +23,7 @@ namespace Api.Services
             _mapper = mapper;
             _context = context;
         }
-
+        #region Posts
         public async Task CreatePost(CreatePostRequest request)
         {
             var model = _mapper.Map<CreatePostModel>(request);
@@ -54,7 +57,7 @@ namespace Api.Services
                 .Include(x => x.Comments)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
-            if (post == null)
+            if (post == null || post.IsDeleted)
                 throw new PostNotFoundException();
             return post;
         }
@@ -68,16 +71,41 @@ namespace Api.Services
         }
 
         public async Task<List<PostModel>> GetPosts(int skip, int take, Guid userId)
-            => await _context.Posts
+        {
+            var posts = await _context.Posts
                 .Include(x => x.Author).ThenInclude(x => x.Avatar)
                 .Include(x => x.PostImages)
                 .Include(x => x.Likes)
-                .Include(x => x.Comments).AsNoTracking()
+                .Include(x => x.Comments)
+                .Where(x => !x.IsDeleted).AsNoTracking()
                 .OrderByDescending(x => x.CreatedDate).Skip(skip).Take(take)
-                .Select(x => _mapper.Map<PostModel>(x))
+                //.Select(x => _mapper.Map<PostModel>(x))
                 //.Select(x => x.IsLiked =)
                 .ToListAsync();
+            List<PostModel> postModels = new(posts.Count);
+            foreach (var post in posts)
+            {
+                bool like = post.Likes!.Any(x => x.UserId == userId);
+                var model = _mapper.Map<PostModel>(post);
+                model.IsLiked = like;
+                postModels.Add(model);
+            }
+            return postModels;
+        }
 
+        public async Task DeletePost(Guid postId)
+        {
+            var post = await GetPostById(postId);
+            post.IsDeleted = true;
+            post.DeleteDate = DateTimeOffset.Now;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<AttachModel> GetPostImage(Guid postContentId)
+            => _mapper.Map<AttachModel>(await _context.PostImages.FirstOrDefaultAsync(x => x.Id == postContentId));
+        #endregion
+
+        #region Comments
         public async Task AddComment(CreateCommentModel model)
         {
             var dbComment = _mapper.Map<Comment>(model);
@@ -89,58 +117,96 @@ namespace Api.Services
         {
             var dbComment = _context.Comments
                 .FirstOrDefault(x => x.Id == id);
-            if (dbComment == null)
+            if (dbComment == null || dbComment.IsDeleted)
                 throw new CommentNotFoundException();
-            _context.Comments.Remove(dbComment);
+            dbComment.IsDeleted = true;
+            dbComment.DeleteDate = DateTimeOffset.Now;
+            //_context.Comments.Remove(dbComment);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<CommentModel>> GetPostComments(Guid id)
-            => await _context.Comments
+        public async Task<IEnumerable<CommentModel>> GetPostComments(Guid id, Guid userId)
+        {
+            var comments = await _context.Comments
                 .Include(x => x.Author).ThenInclude(x => x.Avatar)
-                .Where(x => x.PostId == id)
-                .Select(x => _mapper.Map<CommentModel>(x))
+                .Where(x => x.PostId == id && !x.IsDeleted).AsNoTracking()
+                .OrderByDescending(x => x.CreatedDate)
                 .ToListAsync();
+            List<CommentModel> commentModels = new(comments.Count);
+            foreach (var comment in comments)
+            {
+                bool like = comment.Likes!.Any(x => x.UserId == userId);
+                var model = _mapper.Map<CommentModel>(comment);
+                model.IsLiked = like;
+                commentModels.Add(model);
+            }
+            return commentModels;
+        }
+        #endregion
 
+        #region Likes
         public async Task LikePost(CreateLikeModel model)
         {
-            if (await _context.Likes.AnyAsync(x => x.UserId == model.UserId && x.PostId == model.ObjectId))
+            var like = _context.PostLikes.FirstOrDefault(x => x.UserId == model.UserId && x.PostId == model.ObjectId);
+            if (like == null)
+                throw new LikeNotFoundException();
+            if(!like.IsCanceled)
                 throw new LikeAlreadyExistException();
-            var dbLike = _mapper.Map<Like>(model);
-            await _context.Likes.AddAsync(dbLike);
+            if (like.IsCanceled)
+            {
+                like.IsCanceled = false;
+                like.CancelDate = null;
+            }
+            else
+            {
+                var dbLike = _mapper.Map<PostLike>(model);
+                await _context.PostLikes.AddAsync(dbLike);
+            }
             await _context.SaveChangesAsync();
         }
 
         public async Task UnlikePost(Guid id, Guid userId)
         {
-            var dbLike = _context.Likes
-                .FirstOrDefault(x => x.PostId == id && x.UserId == userId);
+            var dbLike = _context.PostLikes.FirstOrDefault(x => x.PostId == id && x.UserId == userId && !x.IsCanceled);
             if (dbLike == null)
                 throw new LikeNotFoundException();
-            _context.Likes.Remove(dbLike);
+            dbLike.IsCanceled = true;
+            dbLike.CancelDate = DateTimeOffset.Now;
             await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<LikeModel>> GetPostLikes(Guid id)
-            => await _context.Likes
+            => await _context.PostLikes
                 .Include(x => x.Author).ThenInclude(x => x.Avatar)
-                .Where(x => x.PostId == id)
+                .Where(x => x.PostId == id && !x.IsCanceled)
                 .Select(x => _mapper.Map<LikeModel>(x))
                 .ToListAsync();
 
         public async Task LikeComment(CreateLikeModel model)
         {
-            if(await _context.CommentLikes.AnyAsync(x => x.UserId == model.UserId && x.CommentId == model.ObjectId))
+            var like = _context.CommentLikes
+                .FirstOrDefault(x => x.UserId == model.UserId && x.CommentId == model.ObjectId);
+            if (like == null)
+                throw new LikeNotFoundException();
+            if (!like.IsCanceled)
                 throw new LikeAlreadyExistException();
-            var dbLike = _mapper.Map<CommentLike>(model);
-            await _context.CommentLikes.AddAsync(dbLike);
+            if (like.IsCanceled)
+            {
+                like.IsCanceled = false;
+                like.CancelDate = null;
+            }
+            else
+            {
+                var dbLike = _mapper.Map<CommentLike>(model);
+                await _context.CommentLikes.AddAsync(dbLike);
+            }
             await _context.SaveChangesAsync();
         }
 
         public async Task UnlikeComment(Guid id, Guid userId)
         {
             var dbLike = _context.CommentLikes
-                .FirstOrDefault(x => x.CommentId == id && x.UserId == userId);
+                .FirstOrDefault(x => x.CommentId == id && x.UserId == userId && !x.IsCanceled);
             if (dbLike == null)
                 throw new LikeNotFoundException();
             _context.CommentLikes.Remove(dbLike);
@@ -150,21 +216,9 @@ namespace Api.Services
         public async Task<IEnumerable<LikeModel>> GetCommentLikes(Guid id)
             => await _context.CommentLikes
                 .Include(x => x.Author).ThenInclude(x => x.Avatar)
-                .Where(x => x.CommentId == id)
+                .Where(x => x.CommentId == id && !x.IsCanceled)
                 .Select(x => _mapper.Map<LikeModel>(x))
                 .ToListAsync();
-
-        public async Task<AttachModel> GetPostImage(Guid postContentId)
-            => _mapper.Map<AttachModel>(
-                await _context.PostImages.FirstOrDefaultAsync(x => x.Id == postContentId));
-
-        public async Task DeletePost(Guid postId)
-        {
-            var post = _context.Posts.FirstOrDefault(x => x.Id == postId);
-            if (post == null)
-                throw new PostNotFoundException();
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
-        }
+        #endregion
     }
 }

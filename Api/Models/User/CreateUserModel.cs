@@ -4,21 +4,21 @@ namespace Api.Models.User
 {
     public class CreateUserModel
     {
-        [Required]
+        [Required(ErrorMessage = "Введите имя")]
         public string Name { get; set; } = null!;
         public string? FullName { get; set; }
         public string? About { get; set; }
         [Required]
-        [EmailAddress]
+        //[EmailAddress]
         public string Email { get; set; } = null!;
-        [Required]
-        [RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
+        [Required(ErrorMessage = "Введите пароль")]
+        //[RegularExpression(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$")]
         public string Password { get; set; } = null!;
         [Required]
-        [Compare(nameof(Password))]
+        [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают")]
         public string RetryPassword { get; set; } = null!;
-        [Required]
+        [Required(ErrorMessage = "Укажите дату рождения.")]
         public DateTimeOffset BirthDate { get; set; }
-        public DateTimeOffset RegistrateDate { get; set; }
+        //public DateTimeOffset RegistrateDate { get; set; }
     }
 }

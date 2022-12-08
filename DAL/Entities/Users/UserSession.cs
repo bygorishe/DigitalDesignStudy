@@ -1,4 +1,4 @@
-﻿namespace DAL.Entities.UserAssociations
+﻿namespace DAL.Entities.Users
 {
     public class UserSession
     {

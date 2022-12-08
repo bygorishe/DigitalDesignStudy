@@ -1,14 +1,17 @@
 ﻿using Api.Configs;
 using Api.Exceptions;
 using Api.Models.Token;
-using Common;
+using Common.Services;
 using DAL;
-using DAL.Entities.UserAssociations;
+using DAL.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Services
 {
@@ -26,10 +29,18 @@ namespace Api.Services
         private async Task<User> GetUserByCredention(string login, string pass)
         {
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email.ToLower() == login.ToLower());
-            if (user == null)
+            if (user == null || user.IsDeleted)
                 throw new UserNotFoundException();
-            if (!HashHelper.Verify(pass, user.PasswordHash))
+            if (!user.IsVerified)
+                throw new NotVerifiedException();
+            if (!HashServices.Verify(pass, user.PasswordHash))
                 throw new WrongPasswordException();
+            if (user.IsDeleted)
+            {
+                user.IsDeleted = false;
+                user.DeleteDate = null;
+                await _context.SaveChangesAsync();
+            }
             return user;
         }
 
@@ -37,7 +48,7 @@ namespace Api.Services
         {
             var dtNow = DateTime.Now;
             if (session.User == null)
-                throw new Exception("magic");
+                throw new UserNotFoundException();
 
             var jwt = new JwtSecurityToken(
                 issuer: _config.Issuer,
@@ -125,5 +136,49 @@ namespace Api.Services
             else
                 throw new SecurityTokenException("Invalid token");
         }
+
+        public async Task VerifiedEmail(User dbUser)
+        {
+            if (dbUser != null)
+            {
+                var code = new Guid();// = await GenerateEmailConfirmationTokenAsync(user);
+                //var callbackUrl = UrlHelperExtensions.PageLink(urlHelper: IUrlHelper.RouteUrl(@"/actions"),
+                //            pageHandler: null,
+                //            values: new { area = "Identity", userId = dbUser.Id, code = code },
+                //            protocol: "https"); ; ;
+
+                await EmailService.SendEmailAsync(dbUser.Email, "Confirm your account",
+                                $"Подтвердите регистрацию, перейдя по ссылке:  ");
+                 //< a href = '{callbackUrl}' > link </ a >
+            }
+        }
+
+
+
+        //        [HttpGet]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        //{
+        //    if (userId == null || code == null)
+        //    {
+        //        return View("Error");
+        //    }
+        //    var user = await _userManager.FindByIdAsync(userId);
+        //    if (user == null)
+        //    {
+        //        return View("Error");
+        //    }
+        //    var result = await _userManager.ConfirmEmailAsync(user, code);
+        //    if (result.Succeeded)
+        //        return RedirectToAction("Index", "Home");
+        //    else
+        //        return View("Error");
+        //}
+
+        //[HttpGet]
+        //public IActionResult Login(string returnUrl = null)
+        //{
+        //    return View(new LoginViewModel { ReturnUrl = returnUrl });
+        //}
     }
 }

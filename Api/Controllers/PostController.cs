@@ -95,61 +95,61 @@ namespace Api.Controllers
             await _postService.LikePost(model);
         }
 
-        [HttpDelete]
-        [Authorize]
-        public async Task DeleteLike(Guid id)
-        {
-            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
-            if (userId == default)
-                throw new NotAuthorizedException();
-            await _postService.UnlikePost(id, userId);
-        }
+        //[HttpDelete]
+        //[Authorize]
+        //public async Task DeleteLike(Guid id)
+        //{
+        //    var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+        //    if (userId == default)
+        //        throw new NotAuthorizedException();
+        //    await _postService.UnlikePost(id, userId);
+        //}
 
-        [HttpPost]
-        [Authorize]
-        public async Task LikeComment(CreateLikeModel model)
-        {
-            if (!model.UserId.HasValue)
-            {
-                var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
-                if (userId == default)
-                    throw new NotAuthorizedException();
-                model.UserId = userId;
-            }
-            await _postService.LikeComment(model);
-        }
+        //[HttpPost]
+        //[Authorize]
+        //public async Task LikeComment(CreateLikeModel model)
+        //{
+        //    if (!model.UserId.HasValue)
+        //    {
+        //        var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+        //        if (userId == default)
+        //            throw new NotAuthorizedException();
+        //        model.UserId = userId;
+        //    }
+        //    await _postService.LikeComment(model);
+        //}
 
-        [HttpDelete]
-        [Authorize]
-        public async Task DeleteCommentLike(Guid id)
-        {
-            var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
-            if (userId == default)
-                throw new NotAuthorizedException();
-            await _postService.UnlikeComment(id, userId);
-        }
+        //[HttpDelete]
+        //[Authorize]
+        //public async Task DeleteCommentLike(Guid id)
+        //{
+        //    var userId = User.GetClaimValue<Guid>(ClaimNames.Id);
+        //    if (userId == default)
+        //        throw new NotAuthorizedException();
+        //    await _postService.UnlikeComment(id, userId);
+        //}
+
+        ////[HttpGet]
+        ////[Authorize]
+        ////public async Task<FileStreamResult> GetPostContent(Guid postContentId, bool download = false) //не робит
+        ////{
+        ////    var attach = await _postService.GetPostImage(postContentId);
+        ////    var fs = new FileStream(attach.FilePath, FileMode.Open);
+        ////    if (download)
+        ////        return File(fs, attach.MimeType, attach.Name);
+        ////    else
+        ////        return File(fs, attach.MimeType);
+        ////}
 
         //[HttpGet]
         //[Authorize]
-        //public async Task<FileStreamResult> GetPostContent(Guid postContentId, bool download = false) //не робит
-        //{
-        //    var attach = await _postService.GetPostImage(postContentId);
-        //    var fs = new FileStream(attach.FilePath, FileMode.Open);
-        //    if (download)
-        //        return File(fs, attach.MimeType, attach.Name);
-        //    else
-        //        return File(fs, attach.MimeType);
-        //}
+        //public async Task<IEnumerable<CommentModel>> GetPostComments(Guid postId)
+        //    => await _postService.GetPostComments(postId);
 
-        [HttpGet]
-        [Authorize]
-        public async Task<IEnumerable<CommentModel>> GetPostComments(Guid postId)
-            => await _postService.GetPostComments(postId);
-
-        [HttpGet]
-        [Authorize]
-        public async Task<IEnumerable<LikeModel>> GetPostLikes(Guid postId)
-            => await _postService.GetPostLikes(postId);
+        //[HttpGet]
+        //[Authorize]
+        //public async Task<IEnumerable<LikeModel>> GetPostLikes(Guid postId)
+        //    => await _postService.GetPostLikes(postId);
 
         [HttpGet]
         [Authorize]
