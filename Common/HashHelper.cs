@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Common.Services
+namespace Common
 {
     public static class HashServices
     {

@@ -69,5 +69,25 @@ namespace Api.Services
 
         public async Task<ChatModel> GetChat(Guid chatId)
             => _mapper.Map<ChatModel>(await GetChatById(chatId));
+
+        public async Task ReadMessage()
+        {
+
+        }
+
+        public async Task ReadAllMessages()
+        {
+
+        }
+
+        public async Task LikeMessage()
+        {
+
+        }
+
+        public async Task UnlikeMessage()
+        {
+
+        }
     }
 }

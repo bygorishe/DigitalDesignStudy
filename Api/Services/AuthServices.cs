@@ -12,6 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Mvc;
+using Common;
 
 namespace Api.Services
 {
@@ -147,8 +148,8 @@ namespace Api.Services
                 //            values: new { area = "Identity", userId = dbUser.Id, code = code },
                 //            protocol: "https"); ; ;
 
-                await EmailService.SendEmailAsync(dbUser.Email, "Confirm your account",
-                                $"Подтвердите регистрацию, перейдя по ссылке:  ");
+                //await EmailService.SendEmailAsync(dbUser.Email, "Confirm your account",
+                              //  $"Подтвердите регистрацию, перейдя по ссылке:  ");
                  //< a href = '{callbackUrl}' > link </ a >
             }
         }

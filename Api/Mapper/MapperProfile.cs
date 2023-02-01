@@ -8,7 +8,7 @@ using Api.Models.Post;
 using Api.Models.Subscribtion;
 using Api.Models.User;
 using AutoMapper;
-using Common.Services;
+using Common;
 using DAL.Entities.Attaches;
 using DAL.Entities.Chats;
 using DAL.Entities.Likes;

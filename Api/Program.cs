@@ -3,6 +3,8 @@ using Api.Mapper;
 using Api.Middlewares;
 using Api.Services;
 using AspNetCoreRateLimit;
+using Common.Services;
+using MailKit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -10,8 +12,11 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 var authSection = builder.Configuration.GetSection(AuthConfig.Position);
+var mailSection = builder.Configuration.GetSection(MailConfig.Position);
 var authConfig = authSection.Get<AuthConfig>();
+var mailConfig = mailSection.Get<MailConfig>();
 
+builder.Services.Configure<MailConfig>(mailSection);
 builder.Services.Configure<AuthConfig>(authSection);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -68,6 +73,7 @@ builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<LinkGeneratorService>();
 builder.Services.AddScoped<SubscribtionService>();
 builder.Services.AddScoped<ChatServices>();
+builder.Services.AddTransient<EmailService>();
 
 builder.Services.AddAuthentication(o =>
 {
